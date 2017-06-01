@@ -1,0 +1,13 @@
+.idea
+*.pyc
+*.log
+.venv
+.testrepository
+.project
+.pydevproject
+build
+dist
+aic_ord.egg-info
+ord.egg-info/
+.settings/
+.tox/
