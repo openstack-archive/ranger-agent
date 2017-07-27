@@ -1,16 +1,16 @@
 {
   "rds-listener": {
     "request-id": "1",
-    "resource-id": "1",    
+    "resource-id": "1",
     "resource-type": "customer",
     "resource-template-version": "1",
     "resource-template-name": "template.yaml",
     "resource-template-type": "hot",
     "operation": "create",
     "ord-notifier-id": "1",
-    "region": "X" ,
+    "region": "X",
     "status": "completed",
     "error-code": "",
-    "error-msg": ""   
+    "error-msg": ""
   }
 }

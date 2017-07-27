@@ -1,7 +1,7 @@
-This is the ORD project. At the highest view, provides an API interface
+This is the ranger-agent project. At the highest view, provides an API interface
 for users to move OpenStack templates from CodeCloud into OS Heat.
 
 This project is designed to show a recommended set of modules
 for creating a simple API server and Engine, with a versioned API, clean separation
 of modules, a standard way of structuring both unit and functional tests,
-configuration files,and documentation.
+configuration files, and documentation.

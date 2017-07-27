@@ -1,7 +1,7 @@
 {
   "ord-notifier-response": {
     "request-id": "1",
-    "resource-id": "1",    
+    "resource-id": "1",
     "resource-type": "customer",
     "resource-template-version": "1",
     "resource-template-name": "template.yaml",
@@ -11,6 +11,6 @@
     "region": "X" ,
     "status": "submitted",
     "error-code": "",
-    "error-msg": ""   
+    "error-msg": ""
   }
 }
