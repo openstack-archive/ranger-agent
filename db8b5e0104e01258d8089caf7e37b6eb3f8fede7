@@ -1,0 +1,9 @@
+Code-Review+1: Aaron McLean <am9518@att.com>
+Code-Review+2: Hari <hosingh000@gmail.com>
+Workflow+1: Hari <hosingh000@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 27 Jul 2017 15:18:44 +0000
+Reviewed-on: https://review.openstack.org/487635
+Project: openstack/ranger-agent
+Branch: refs/heads/master
