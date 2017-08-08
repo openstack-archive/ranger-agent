@@ -13,13 +13,13 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 
-import os
-import subprocess
-import shlex
 import ord.common.exceptions as excp
+import os
+import shlex
+import subprocess
 
-from oslo_config import cfg
 from ord.openstack.common import log as logging
+from oslo_config import cfg
 
 
 CONF = cfg.CONF

@@ -15,9 +15,9 @@
 
 import mock
 
-from ord.tests import base
-from ord.engine.workerfactory import WorkerFactory
 from ord.common.exceptions import WorkerThreadError
+from ord.engine.workerfactory import WorkerFactory
+from ord.tests import base
 
 
 class TestWorkerFactory(base.BaseTestCase):
@@ -44,9 +44,12 @@ class TestWorkerFactory(base.BaseTestCase):
         self.worker = WorkerFactory()
 
     def test_getWorker(self):
-        threadId = self.worker.getWorker(self.operation, self.path_to_tempate,
-                              self.stack_name, self.template_status_id,
-                              self.resource_type, self.template_type)
+        threadId = self.worker.getWorker(self.operation,
+                                         self.path_to_tempate,
+                                         self.stack_name,
+                                         self.template_status_id,
+                                         self.resource_type,
+                                         self.template_type)
         assert (threadId > 0)
 
     def test_negetive_removeWorker(self):
@@ -55,11 +58,11 @@ class TestWorkerFactory(base.BaseTestCase):
 
     def test_removeWorker(self):
         localThreadId = self.worker.getWorker(self.operation,
-                                             self.path_to_tempate,
-                                             self.stack_name,
-                                             self.template_status_id,
-                                             self.resource_type,
-                                             self.template_type)
+                                              self.path_to_tempate,
+                                              self.stack_name,
+                                              self.template_status_id,
+                                              self.resource_type,
+                                              self.template_type)
         try:
             self.worker.removeWorker(localThreadId)
         except Exception:

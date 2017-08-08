@@ -100,7 +100,7 @@ logging_cli_opts = [
                      'Existing syslog format is DEPRECATED during I, '
                      'and will change in J to honor RFC5424.'),
     cfg.BoolOpt('use-syslog-rfc-format',
-                # TODO(bogdando) remove or use True after existing
+                # TODO() remove or use True after existing
                 #    syslog format deprecation in J
                 default=False,
                 help='(Optional) Enables or disables syslog rfc5424 format '
@@ -217,7 +217,7 @@ def _get_binary_name():
 
 
 def _get_log_file_path(binary=None):
-    logfile = sys.argv[0].split('/')[-1]+'.log'
+    logfile = sys.argv[0].split('/')[-1] + '.log'
     logdir = CONF.log_dir
 
     if logfile and not logdir:
@@ -549,7 +549,7 @@ def _setup_logging_from_conf(project, version):
     if CONF.use_syslog:
         try:
             facility = _find_facility_from_conf()
-            # TODO(bogdando) use the format provided by RFCSysLogHandler
+            # TODO() use the format provided by RFCSysLogHandler
             #   after existing syslog format deprecation in J
             if CONF.use_syslog_rfc_format:
                 syslog = RFCSysLogHandler(address='/dev/log',

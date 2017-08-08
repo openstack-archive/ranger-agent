@@ -17,8 +17,8 @@
 Unit Tests for ord.client.rpcengine
 """
 import copy
-from ord.tests import base
 from ord.client import rpcengine
+from ord.tests import base
 from oslo_config import cfg
 import stubout
 

@@ -118,8 +118,7 @@ class _Win32Colorizer(object):
             'yellow': red | green | bold,
             'magenta': red | blue | bold,
             'cyan': green | blue | bold,
-            'white': red | green | blue | bold
-            }
+            'white': red | green | blue | bold}
 
     def supported(cls, stream=sys.stdout):
         try:

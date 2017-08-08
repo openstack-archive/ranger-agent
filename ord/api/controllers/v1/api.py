@@ -16,9 +16,9 @@
 from ord.client import rpcapi
 from ord.common import exceptions as exc
 from ord.common import utils
-from ord.i18n import _
 from ord.common.utils import ErrorCode
 from ord.db import api as db_api
+from ord.i18n import _
 from ord.openstack.common import log
 from oslo_config import cfg
 from pecan import expose
@@ -203,13 +203,13 @@ class NotifierController(object):
             msg = _("A valid request_id parameter is required")
             raise webob.exc.HTTPBadRequest(explanation=msg)
 
-        # FIXME(db2242) we don't process this field. So why for it here?
+        # FIXME we don't process this field. So why for it here?
         resource_type = vals.get('resource-type')
         if resource_type is None:
             msg = _("A valid resource_type parameter is required")
             raise webob.exc.HTTPBadRequest(explanation=msg)
 
-        # FIXME(db2242): we support specific set of operation. We must check
+        # FIXME we support specific set of operation. We must check
         # that received operation is in support list.
         resource_operation = vals.get('operation')
         if resource_operation is None:
@@ -221,10 +221,10 @@ class NotifierController(object):
             msg = _("A valid resource-template-name parameter is required")
             raise webob.exc.HTTPBadRequest(explanation=msg)
 
-        # FIXME(db2242): why the hell we need it?
+        # FIXME: why is this needed?
         template_version = vals.get('resource-template-version')
 
-        # FIXME(db2242): we can handle only 'hot' or 'ansible' values here
+        # FIXME: we can handle only 'hot' or 'ansible' values here
         # Everything else must be rejected here.
         template_type = vals.get('resource-template-type')
         if template_type is None:

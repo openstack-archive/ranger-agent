@@ -13,13 +13,13 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 
-import os
 import mock
 from mock import patch
+import os
 
-from ord.tests import base
 from ord.client import getrepo
 from ord.common.exceptions import ORDException
+from ord.tests import base
 from oslo_config import cfg
 
 CONF = cfg.CONF

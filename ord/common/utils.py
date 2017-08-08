@@ -82,7 +82,7 @@ def cpu_count():
         return 1
 
 
-# FIXME(db2242): unused!
+# FIXME: unused!
 def update_nested(original_dict, updates):
     """Updates the leaf nodes in a nest dict.
 
@@ -127,7 +127,6 @@ def create_rds_payload(template, template_target):
     return payload
 
 
-# FIXME(db2242): remove it
 class ErrorCode(Enum):
 
     ORD_NOERROR = ""

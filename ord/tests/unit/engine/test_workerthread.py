@@ -27,7 +27,6 @@ from ord.tests import base
 CONF = cfg.CONF
 
 
-# FIXME(db2242): pep8 compatible - camelcase attributes
 class TestWorkerThread(base.BaseTestCase):
 
     def setUp(self):
@@ -83,9 +82,9 @@ class TestWorkerThread(base.BaseTestCase):
                            'resource-id': '1',
                            'resource-type': 'image',
                            'resource_extra_metadata':
-        {'checksum': 'dae557b1365b606e57fbd5d8c9d4516a',
-         'size': '10',
-         'virtual_size': '12'}}}
+                           {'checksum': 'dae557b1365b606e57fbd5d8c9d4516a',
+                            'size': '10',
+                            'virtual_size': '12'}}}
 
         self.heat_client.get_stack_by_name.return_value = stack
         self.heat_client.get_image_data_by_stackid.return_value = image_data

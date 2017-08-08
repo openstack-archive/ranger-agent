@@ -17,8 +17,8 @@
 Unit Tests for ord.client.rpcapi
 """
 import copy
-from ord.tests import base
 from ord.client import rpcapi
+from ord.tests import base
 from oslo_config import cfg
 import stubout
 

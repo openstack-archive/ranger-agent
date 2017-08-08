@@ -25,7 +25,7 @@ class HeatClient(object):
     _kc = None
 
     def __init__(self):
-        # FIXME(db2242): we must not cache any clients because it done(must
+        # FIXME: we must not cache any clients because it done(must
         # be done) by "Clients"
         try:
             if HeatClient._kc is None:
@@ -46,13 +46,13 @@ class HeatClient(object):
         client, self._kc = Clients().heat(self._kc)
         try:
             payload = client.stacks.get(stack_id)
-            # TODO(db2242): check behaviour in case it object not exist
+            # TODO: check behaviour in case it object not exist
         except heat_exc.BaseException as e:
             raise exc.HEATIntegrationError(
                 action='stacks.get', details=e.message)
         return payload
 
-    # TODO(db2242): check real heatclient capabilities to lookup objects
+    # TODO: check real heatclient capabilities to lookup objects
     def get_stack_by_name(self, name):
         for stack in self.get_stacks():
             if stack.stack_name != name:

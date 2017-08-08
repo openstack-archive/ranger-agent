@@ -16,12 +16,12 @@
 """
 Unit Tests for ord.api.test_api
 """
-from ord.tests import base
+import mock
+from mox import stubout
 from ord.api.controllers.v1 import api
 from ord.db import api as db_api
+from ord.tests import base
 from oslo_config import cfg
-from mox import stubout
-import mock
 import requests
 import urllib2
 import webob
@@ -240,25 +240,25 @@ class OrdApiTestCase(base.BaseTestCase):
         ord_notifier = api.NotifierController()
         request_id = {"Id": "2"}
         db_template = {'resource_operation': 'create',
-              'resource_id': '1',
-              'region': 'local',
-              'template_type': 'hot',
-              'request_id': '2'}
+                       'resource_id': '1',
+                       'region': 'local',
+                       'template_type': 'hot',
+                       'request_id': '2'}
 
         db_template_target = {'template_type': 'hot',
-               'status': 'Submitted',
-               'resource_name': 'image1',
-               'resource_operation': 'create',
-               'resource_template_version': '1',
-               'request_id': '2',
-               'region': 'local',
-               'ord-notifier-id': '1',
-               'resource_id': '1',
-               'resource_type': 'image',
-               'template_status_id': '1',
-               'template_version': '1',
-               'error_code': 'ORD_000',
-               'error_msg': 'stack fail'}
+                              'status': 'Submitted',
+                              'resource_name': 'image1',
+                              'resource_operation': 'create',
+                              'resource_template_version': '1',
+                              'request_id': '2',
+                              'region': 'local',
+                              'ord-notifier-id': '1',
+                              'resource_id': '1',
+                              'resource_type': 'image',
+                              'template_status_id': '1',
+                              'template_version': '1',
+                              'error_code': 'ORD_000',
+                              'error_msg': 'stack fail'}
 
         payload = {'rds-listener':
                    {'request-id': '2',

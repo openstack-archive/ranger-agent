@@ -13,8 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from heatclient import client as heat
 from glanceclient import client as glance
+from heatclient import client as heat
 from keystoneclient import discover as keystone_discover
 from keystoneclient.v2_0 import client as keystone_v2
 from keystoneclient.v3 import client as keystone_v3
@@ -23,7 +23,7 @@ from oslo_config import cfg
 from ord.openstack.common import log as logging
 
 
-# FIXME(db2242): we definetly must change this group name. It very confusing.
+# FIXME: we definetly must change this group name. It very confusing.
 OPT_GROUP = cfg.OptGroup(name='ord_credentials', title='ORD Credentials')
 SERVICE_OPTS = [
     cfg.StrOpt('project_id', default='',

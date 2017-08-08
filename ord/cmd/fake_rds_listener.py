@@ -16,10 +16,10 @@
 # limitations under the License.
 
 import argparse
+import json
 import sys
 import time
 import uuid
-import json
 
 from werkzeug import exceptions as exc
 from werkzeug import routing
@@ -140,7 +140,7 @@ class _NotifierCatcher(_HandlerBase):
     def _payload_from_form(self):
         payload = dict(self.request.form)
 
-        # FIXME(db2242): ugly fix of incorrect data transfer from ORD-API
+        # FIXME: ugly fix of incorrect data transfer from ORD-API
         if len(payload) != 1:
             return payload
 
