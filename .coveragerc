@@ -1,0 +1,8 @@
+[run]
+branch = True
+source = ord
+omit = ord/tests/*
+cover_pylib = True
+
+[report]
+ignore_errors = True
