@@ -11,3 +11,4 @@ ord.egg-info/
 ranger_agent.egg-info
 .settings/
 .tox/
+localrc
