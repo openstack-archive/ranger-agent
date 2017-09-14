@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 cd ..
-sudo -H pip install -r requirements.txt
+sudo -H pip install -r requirements.txt --proxy $HTTP_PROXY
 sudo python setup.py install
 echo ""
 echo "Running ord-dbsync"
