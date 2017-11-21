@@ -1,5 +1,4 @@
-# Copyright (c) 2012 OpenStack Foundation
-# All Rights Reserved.
+#  Copyright 2016 ATT
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -59,29 +58,33 @@ class TemplateRepoClient(object):
         repopath = os.path.join(os.environ['HOME'], local_repo)
 
         repo = cfg.CONF.orm.orm_template_repo_url
-        LOG.debug(
+        LOG.info(
             "%s Setting up repo initiated ...", os.path.basename(repo))
 
         # create the git repo directory if not exists
         if not os.path.isdir(repopath):
             os.makedirs(repopath)
-
-        # initialize repo directory as a git repo
-        cmd = 'git init {0}'.format(repopath)
-        self.run_git('GitRepoInit', cmd)
-
-        # set remote origin
-        cmd = 'git -C {0} remote add origin {1}'.format(
-            repopath, repo)
-        self.git_repo_status = self.run_git('GitRepoInit', cmd)
-
-        # fetch origin
-        cmd = 'git -C {0} fetch origin'.format(
-            repopath)
-        self.git_repo_status = self.run_git('GitRepoInit', cmd)
-
-        LOG.debug(
-            "%s repo setup successfully", os.path.basename(repo))
+        try:
+            # initialize repo directory as a git repo
+            cmd = 'git init {0}'.format(repopath)
+            self.run_git('GitRepoInit', cmd)
+            try:
+                # set remote origin
+                cmd = 'git -C {0} remote add origin {1}'.format(
+                    repopath, repo)
+                self.run_git('GitRepoInit', cmd)
+            except Exception as repoexp:
+                pass
+            # fetch origin
+            cmd = 'git -C {0} fetch origin'.format(
+                repopath)
+            self.run_git('GitRepoInit', cmd)
+        except Exception as repoexp:
+            self.git_repo_status = False
+            LOG.critical("Failed to initialize Repo %s " % repoexp)
+        LOG.info(
+            "%s Setting up repo status (completed = %s)",
+            os.path.basename(repo), self.git_repo_status)
 
     def pull_template(self, local_repo, pathtotemplate):
         """Get template from repo.
@@ -128,7 +131,7 @@ class TemplateRepoClient(object):
             try:
                 process = subprocess.Popen(
                     shlex.split(cmd), stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
+                    shell=False, stderr=subprocess.PIPE)
 
                 [stdout, stderr] = process.communicate()
 
@@ -153,19 +156,20 @@ class TemplateRepoClient(object):
                 proc_result["stderr"] = stderr.decode("UTF-8")
                 proc_result["timed_out"] = timed_out
 
-                if proc_result["returncode"] == 0 or \
-                   proc_result["returncode"] == 128:
+                if proc_result["returncode"] == 0:
                     retry_left = 0
                     process.returncode = 0
+                    self.git_repo_status = True
                 else:
-                    retry_left -= 1
-                    LOG.warning("stderr: %s", proc_result['stderr'])
+                    if 'remote origin already exists' in proc_result["stderr"]:
+                        retry_left = 0
+                    else:
+                        retry_left -= 1
+                    LOG.warning("stderr: %s", proc_result)
                     LOG.warning("Retrying cmd '%s'. Retries left: %s",
                                 cmd, retry_left)
 
-        self.git_repo_status = True
         if process.returncode != 0:
-            self.git_repo_status = False
             self.check_git_errors(label, proc_result)
 
     def check_git_errors(self, label, result):
@@ -174,18 +178,21 @@ class TemplateRepoClient(object):
         if result['timed_out']:
             raise excp.RepoTimeoutException(label=label)
 
-        if 'service not known' in stderr:
+        elif 'service not known' in stderr:
             raise excp.RepoIncorrectURL(label=label)
 
-        if 'does not exist' in stderr:
+        elif 'does not exist' in stderr:
             raise excp.RepoNotExist(label=label)
 
-        if 'permission denied' in stderr:
+        elif ('permission denied' in stderr) or ('No such remote' in stderr):
             raise excp.RepoNoPermission(label=label)
 
-        if 'did not match any file(s) known to git' in stderr:
+        elif 'did not match any file(s) known to git' in stderr:
             raise excp.FileNotInRepo(label=label)
 
-        # general unknown exception in case none of the above
-        # are the cause of the problem
-        raise excp.RepoUnknownException(label=label, unknown=stderr)
+        elif 'remote origin already exists' in stderr:
+            pass
+        else:
+            # general unknown exception in case none of the above
+            # are the cause of the problem
+            raise excp.RepoUnknownException(label=label, unknown=stderr)

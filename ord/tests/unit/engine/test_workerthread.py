@@ -1,5 +1,4 @@
-# Copyright (c) 2012 OpenStack Foundation
-# All Rights Reserved.
+# Copyright 2016 ATT
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -27,6 +26,7 @@ from ord.tests import base
 CONF = cfg.CONF
 
 
+# FIXME(db2242): pep8 compatible - camelcase attributes
 class TestWorkerThread(base.BaseTestCase):
 
     def setUp(self):
@@ -75,16 +75,18 @@ class TestWorkerThread(base.BaseTestCase):
         input_payload = {'rds-listener':
                          {'request-id': '2',
                           'resource-id': '1',
+                          'resource-operation': 'create',
                           'resource-type': 'image'}
                          }
         output_payload = {'rds-listener':
                           {'request-id': '2',
                            'resource-id': '1',
+                           'resource-operation': 'create',
                            'resource-type': 'image',
                            'resource_extra_metadata':
-                           {'checksum': 'dae557b1365b606e57fbd5d8c9d4516a',
-                            'size': '10',
-                            'virtual_size': '12'}}}
+                               {'checksum': 'dae557b1365b606e57fbd5d8c9d4516a',
+                                'size': '10',
+                                'virtual_size': '12'}}}
 
         self.heat_client.get_stack_by_name.return_value = stack
         self.heat_client.get_image_data_by_stackid.return_value = image_data
@@ -165,17 +167,16 @@ class TestWorkerThread(base.BaseTestCase):
             id='1', stack_name=self.stack_name,
             stack_status='CREATE_IN_PROGRESS')
         stack_ready = base.Dummy(
-            id='1', stack_name=self.stack_name, stack_status='CREATE_FAILED')
+            id='1', stack_name=self.stack_name, stack_status='CREATE_FAILED',
+            stack_status_reason='Stack fail due to resource creation')
+
         status_responses = [stack_wait] * 4 + [stack_ready]
 
         self.heat_client.get_stack.side_effect = status_responses
 
-        error = self.assertRaises(
-            exc.StackOperationError, self.workerThread._wait_for_heat,
+        self.assertRaises(
+            exc.HEATStackCreateError, self.workerThread._wait_for_heat,
             stack_wait, utils.OPERATION_CREATE)
-
-        self.assertEqual(utils.OPERATION_CREATE, error.arguments['operation'])
-        self.assertIs(status_responses[-1], error.arguments['stack'])
 
     def test_wait_for_heat_race(self):
         self.patch('time.time', side_effect=itertools.count(1))
