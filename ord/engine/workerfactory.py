@@ -1,5 +1,4 @@
-# Copyright (c) 2012 OpenStack Foundation
-# All Rights Reserved.
+#  Copyright 2016 ATT
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -16,7 +15,7 @@
 import itertools
 import json
 from oslo_config import cfg
-import random
+from random import SystemRandom
 import six
 import sys
 import threading
@@ -83,21 +82,16 @@ class WorkerFactory(object):
                  str(WorkerFactory._client_initialize))
         WorkerThread._init_error = None
         try:
-            try:
-                WorkerThread._temp_repo_client = \
-                    getrepo.TemplateRepoClient(CONF.local_repo)
-            except exc.RepoInitializationException as repoexp:
-                LOG.critical("Failed to initialize Repo %s " % repoexp)
-                WorkerThread._init_error = utils.ErrorCode.ORD_018.value
-            try:
-                WorkerThread._heat_client = heat.HeatClient()
-            except exc.KeystoneInitializationException as kcexp:
-                LOG.critical("Failed to initialize Keystone %s " % kcexp)
-                WorkerThread._init_error = utils.ErrorCode.ORD_016.value
+
+            WorkerThread._temp_repo_client = \
+                getrepo.TemplateRepoClient(CONF.local_repo)
+
+            WorkerThread._heat_client = heat.HeatClient()
+
             try:
                 WorkerThread._rpcengine = rpcengine.RpcEngine()
             except exc.RPCInitializationException as rpcexp:
-                LOG.critical("Failed to initialize RPC %s " % rpcexp)
+                LOG.critical("Failed to initialize RPC %s ", rpcexp)
                 WorkerThread._init_error = utils.ErrorCode.ORD_019.value
 
         except Exception as exception:
@@ -130,9 +124,10 @@ class WorkerFactory(object):
                   template_type):
         template_type = template_type.lower()
 
-        # FIXME: this code have a none zero to fail in very unexpected
+        # FIXME(db2242): this code have a none zero to fail in very unexpected
         # way
-        threadID = random.randint(0, 99999999)
+        randCrypt = SystemRandom()
+        threadID = randCrypt.randint(1, 99999999)
         if template_type == "hot":
             miniWorker = WorkerThread(threadID, operation,
                                       path_to_tempate, stack_name,
@@ -142,7 +137,7 @@ class WorkerFactory(object):
         elif template_type == "ansible":
             threadID = -1
         else:
-            # FIXME: too late for such check
+            # FIXME(db2242): too late for such check
             raise exc.UnsupportedTemplateTypeError(template=template_type)
         return threadID
 
@@ -169,8 +164,11 @@ class WorkerThread(threading.Thread):
         self.client_error = client_error
 
     def extract_resource_extra_metadata(self, rds_payload, rds_status):
+        resource_operation =\
+            rds_payload.get('rds-listener')['resource-operation']
         if self.resource_type.lower() == 'image' \
-                and rds_status == utils.STATUS_SUCCESS:
+                and rds_status == utils.STATUS_SUCCESS\
+                and resource_operation != utils.OPERATION_DELETE:
             stack = self._heat_client.get_stack_by_name(self.stack_name)
             image_data = self._heat_client.get_image_data_by_stackid(stack.id)
             if image_data:
@@ -250,24 +248,23 @@ class WorkerThread(threading.Thread):
 
         try:
             self._wait_for_heat(stack, self.operation)
-        except exc.StackOperationError:
+        except exc.ORDException:
             _, e, _tb = sys.exc_info()
-            if e.arguments['operation'] != utils.OPERATION_CREATE:
-                raise
+            if self.operation == utils.OPERATION_CREATE:
 
-            args = {}
-            try:
-                self._delete_stack()
-                self._wait_for_heat(
-                    e.arguments['stack'], utils.OPERATION_DELETE)
-            except exc.StackOperationError as e_rollback:
-                args['rollback_error'] = e_rollback
-                args['rollback_message'] = e_rollback.message
-                args['rollback_status'] = False
-            else:
-                args['rollback_status'] = True
+                args = {}
+                try:
+                    stack = self._delete_stack()
+                    self._wait_for_heat(
+                        stack, utils.OPERATION_DELETE)
+                except exc.ORDException as e_rollback:
+                    args['rollback_error'] = e_rollback
+                    args['rollback_message'] = e_rollback.message
+                    args['rollback_status'] = False
+                else:
+                    args['rollback_status'] = True
 
-            raise exc.StackRollbackError(error=e, **args)
+            raise
 
     def _update_permanent_storage(self, error=None):
         args = {}
@@ -306,7 +303,8 @@ class WorkerThread(threading.Thread):
 
     def _send_operation_results(self):
         rds_payload = self._prepare_rds_payload()
-        res_ctxt = {'request-id': rds_payload.get('request-id')}
+        res_ctxt = \
+            {'request-id': rds_payload.get('rds-listener')['request-id']}
         LOG.debug("----- RPC API Payload to RDS %r", rds_payload)
         status_original = rds_payload.get('rds-listener')['status']
 
@@ -314,7 +312,7 @@ class WorkerThread(threading.Thread):
             self.extract_resource_extra_metadata(rds_payload, status_original)
         except Exception as exception:
             LOG.error("Unexpected error collecting extra \
-            Image Parameter %s" % exception)
+            Image Parameter %s", exception)
 
         max_range = int(CONF.orm.retry_limits)
         self._rpcengine. \
@@ -415,7 +413,18 @@ class WorkerThread(threading.Thread):
                   status_check.status)
 
         if status_check.is_fail:
-            raise exc.StackOperationError(operation=operation, stack=stack)
+            if operation == utils.OPERATION_CREATE:
+                raise exc.HEATStackCreateError(
+                    details=stack.stack_status_reason)
+            elif operation == utils.OPERATION_MODIFY:
+                raise exc.HEATStackUpdateError(
+                    details=stack.stack_status_reason)
+            elif operation == utils.OPERATION_DELETE:
+                raise exc.HEATStackDeleteError(
+                    details=stack.stack_status_reason)
+            else:
+                raise exc.StackOperationError(
+                    operation=operation, stack=stack)
         elif status_check.is_in_progress:
             raise exc.StackTimeoutError(operation=operation, stack=stack)
 

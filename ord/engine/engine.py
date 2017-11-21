@@ -1,5 +1,4 @@
-# Copyright (c) 2012 OpenStack Foundation
-# All Rights Reserved.
+#  Copyright 2016 ATT
 #
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may
 #  not use this file except in compliance with the License. You may obtain
@@ -15,7 +14,9 @@
 
 from multiprocessing import Process
 import os
+import ast
 from oslo_config import cfg
+
 
 from ord.client import rpcengine
 from ord.engine.workerfactory import WorkerFactory
@@ -51,8 +52,7 @@ class QueueHandler(object):
         LOG.debug("\n Payload: %s \nctxt: %s "
                   % (str(payload), str(ctxt)))
         LOG.debug("\n-------------------------------\n")
-
-        d = eval(payload)
+        d = ast.literal_eval(payload)
         template_type = d["template_type"]
         resource_name = d["resource_name"]
         resource_type = d["resource_type"]

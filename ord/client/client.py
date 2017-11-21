@@ -1,4 +1,3 @@
-# Copyright (c) 2012 OpenStack Foundation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,33 +12,30 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from glanceclient import client as glance
 from heatclient import client as heat
+from glanceclient import client as glance
 from keystoneclient import discover as keystone_discover
 from keystoneclient.v2_0 import client as keystone_v2
 from keystoneclient.v3 import client as keystone_v3
 from oslo_config import cfg
 
+from ord.common import exceptions as exc
 from ord.openstack.common import log as logging
 
 
-# FIXME: we definetly must change this group name. It very confusing.
+# FIXME(db2242): we definetly must change this group name. It very confusing.
 OPT_GROUP = cfg.OptGroup(name='ord_credentials', title='ORD Credentials')
 SERVICE_OPTS = [
     cfg.StrOpt('project_id', default='',
-               help="project id used by ranger-agent "
-                    "driver of service vm extension"),
+               help="project id used by nova driver of service vm extension"),
     cfg.StrOpt('auth_url', default='http://0.0.0.0:5000/v2.0',
-               help="auth URL used by ranger-agent "
-                    "driver of service vm extension"),
+               help="auth URL used by nova driver of service vm extension"),
     cfg.StrOpt('user_name', default='',
-               help="user name used by ranger-agent "
-                    "driver of service vm extension"),
-    cfg.StrOpt('password', default='',
-               help="password used by ranger-agent "
-                    "driver of service vm extension"),
+               help="user name used by nova driver of service vm extension"),
+    cfg.StrOpt('password', default='', secret=True,
+               help="password used by nova driver of service vm extension"),
     cfg.StrOpt('tenant_name', default='',
-               help="tenant name used by ranger-agent driver of service vm "
+               help="tenant name used by nova driver of service vm "
                "extension"),
     cfg.FloatOpt("openstack_client_http_timeout", default=180.0,
                  help="HTTP timeout for any of OpenStack service in seconds"),
@@ -103,9 +99,14 @@ class Clients(object):
             params['tenant_id'] = CONF.project_id
         else:
             params['tenant_name'] = CONF.tenant_name
-        client = create_keystone_client(params)
-        if client.auth_ref is None:
-            client.authenticate()
+        try:
+            client = create_keystone_client(params)
+            if client.auth_ref is None:
+                client.authenticate()
+        except Exception as e:
+            LOG.critical("Failed to initialize Keystone %s ", e)
+            raise exc.KeystoneInitializationException(e.message)
+
         return client
 
     @cached
@@ -129,9 +130,17 @@ class Clients(object):
                                      insecure=CONF.https_insecure,
                                      cacert=CONF.https_cacert)
                 return client, kc
-            except Exception:
-                kc = self.keystone()
-                attempt = attempt - 1
+            except Exception as ex:
+                try:
+                    kc = self.keystone()
+                except Exception as e:
+                    LOG.critical("Failed to initialize Keystone %s ", e)
+                    raise exc.KeystoneInitializationException(e.message)
+                if attempt >= 0:
+                    attempt = attempt - 1
+                else:
+                    LOG.critical("Failed to initialize Heat Client %s ", ex)
+                    raise exc.HEATIntegrationError(ex.message)
 
     @cached
     def glance(self, kc, version='2'):
@@ -154,6 +163,14 @@ class Clients(object):
                                        insecure=CONF.https_insecure,
                                        cacert=CONF.https_cacert)
                 return client, kc
-            except Exception:
-                kc = self.keystone()
-                attempt = attempt - 1
+            except Exception as ex:
+                try:
+                    kc = self.keystone()
+                except Exception as e:
+                    LOG.critical("Failed to initialize Keystone %s ", e)
+                    raise exc.KeystoneInitializationException(e.message)
+                if attempt >= 0:
+                    attempt = attempt - 1
+                else:
+                    LOG.critical("Failed to initialize Client Client %s ", ex)
+                    raise exc.HEATIntegrationError(ex.message)
