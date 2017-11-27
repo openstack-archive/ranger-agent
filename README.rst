@@ -15,11 +15,29 @@ Devstack Installation
 Installation
 ------------
 
-1. Clone the repo and go to the `tools` directory.
+Clone the repo and go to the `tools` directory.
 
   $ `git clone https://git.openstack.org/openstack/ranger-agent`
 
-  $ `cd ranger-agent/tools`
+Docker Container:
+-----------------
+
+1. $ `cd ranger-agent`
+
+2. $ `sudo docker build -t ranger-agent .`
+
+3. $ `sudo docker run -h "ranger-agent" --net host -it --privileged  ranger-agent  bash`
+   Creating docker image and publish will be done by CICD jobs.For Refernce and validation manually image could push using..
+   a). $ `docker login <docker_user_id>`
+   b). $ `docker tag ranger-agent <docker_user_id>/ranger-agent:0.1.0`
+   c). $ `docker push <docker_user_id>/ranger-agent:0.1.0`
+
+4. This docker container will be used by helm chart to deploy
+
+Manual:
+------
+
+1. $ `cd ranger-agent/tools`
 
 2. Run `./ranger-agent-db.sh` for setting up the database.
 
