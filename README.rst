@@ -15,11 +15,25 @@ Devstack Installation
 Installation
 ------------
 
-1. Clone the repo and go to the `tools` directory.
+Clone the repo and go to the `tools` directory.
 
   $ `git clone https://git.openstack.org/openstack/ranger-agent`
 
-  $ `cd ranger-agent/tools`
+Docker Container:
+-----------------
+
+1. $ `cd ranger-agent`
+
+2. $ `sudo docker build -t ranger-agent .`
+
+3. $ `sudo docker run -h "ranger-agent" -it --privileged  ranger-agent  bash`
+
+ranger-agent
+
+Manual:
+------
+
+1. $ `cd ranger-agent/tools`
 
 2. Run `./ranger-agent-db.sh` for setting up the database.
 
