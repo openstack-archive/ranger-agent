@@ -26,7 +26,7 @@ from ord.tests import base
 CONF = cfg.CONF
 
 
-# FIXME(db2242): pep8 compatible - camelcase attributes
+# FIXME: pep8 compatible - camelcase attributes
 class TestWorkerThread(base.BaseTestCase):
 
     def setUp(self):

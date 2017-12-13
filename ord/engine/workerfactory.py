@@ -124,7 +124,7 @@ class WorkerFactory(object):
                   template_type):
         template_type = template_type.lower()
 
-        # FIXME(db2242): this code have a none zero to fail in very unexpected
+        # FIXME: this code have a none zero to fail in very unexpected
         # way
         randCrypt = SystemRandom()
         threadID = randCrypt.randint(1, 99999999)
@@ -137,7 +137,7 @@ class WorkerFactory(object):
         elif template_type == "ansible":
             threadID = -1
         else:
-            # FIXME(db2242): too late for such check
+            # FIXME: too late for such check
             raise exc.UnsupportedTemplateTypeError(template=template_type)
         return threadID
 

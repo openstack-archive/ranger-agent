@@ -23,7 +23,7 @@ from ord.common import exceptions as exc
 from ord.openstack.common import log as logging
 
 
-# FIXME(db2242): we definetly must change this group name. It very confusing.
+# FIXME: we definetly must change this group name. It very confusing.
 OPT_GROUP = cfg.OptGroup(name='ord_credentials', title='ORD Credentials')
 SERVICE_OPTS = [
     cfg.StrOpt('project_id', default='',
