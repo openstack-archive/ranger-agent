@@ -1,0 +1,443 @@
+# Copyright 2017 The Openstack-Helm Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Default values for nova.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+
+release_group: null
+
+labels:
+  api:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  engine:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  job:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+
+images:
+  tags:
+    ranger_agent: hosingh000/ranger-agent:0.1.0
+    test: docker.io/kolla/ubuntu-source-rally:4.0.0
+    db_init: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    db_sync: docker.io/kolla/ubuntu-source-nova-api:3.0.3
+    db_drop: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    ks_user: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    ks_service: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    ks_endpoints: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    bootstrap: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
+  pull_policy: "IfNotPresent"
+
+bootstrap:
+  enabled: true
+  script: null
+
+network:
+  osapi:
+    port: 9010
+    ingress:
+      public: true
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 9000
+  ssh:
+    name: "ranger-agent-ssh"
+    port: 9010
+
+dependencies:
+  api:
+    jobs:
+    - ranger-agent-db-sync
+    - ranger-agent-ks-user
+    - ranger-agent-ks-endpoints
+    services:
+    - service: oslo_messaging
+      endpoint: internal
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
+    - service: ranger-agent-api 
+      endpoint: public
+  db_init:
+    services:
+    - service: oslo_db
+      endpoint: internal
+  db_sync:
+    jobs:
+    - ranger-agent-db-init
+    services:
+    - service: oslo_db
+      endpoint: internal
+  db_drop:
+    services:
+    - service: oslo_db
+      endpoint: internal
+  bootstrap:
+    services:
+    - service: identity
+      endpoint: internal
+  ks_user:
+    services:
+    - service: identity
+      endpoint: internal
+  ks_service:
+    services:
+    - service: identity
+      endpoint: internal
+  ks_endpoints:
+    jobs:
+    - ranger-agent-ks-service
+    services:
+    - service: identity
+      endpoint: internal
+  ranger-agent-api:
+    jobs:
+    - ranger-agent-db-sync
+    services:
+    - service: oslo_messaging
+      endpoint: internal
+    - service: oslo_db
+      endpoint: internal
+    - service: ranger-agent-api
+      endpoint: internal
+
+  ranger-agent-engine:
+    jobs:
+    - ranger-agent-db-sync
+    services:
+    - service: oslo_messaging
+      endpoint: internal
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
+    - service: ranger-agent-engine
+      endpoint: internal
+
+ssh:
+  key_types:
+    - rsa
+    - dsa
+    - ecdsa
+    - ed25519
+
+conf:
+  ssh:
+    override:
+    append:
+  rally_tests:
+    run_tempest: false
+    tests:
+  paste:
+  ranger_agent_sudoers:
+    override:
+    append:
+  rootwrap:
+    override:
+    append:
+  rootwrap_filters:
+    api_metadata:
+      override:
+      append:
+  ranger_agent:
+    DEFAULT:
+      api_workers: 1
+      debug: True
+      verbose: True
+      pecan_debug: True
+      region: local
+      repo_connection_timeout: 120
+      resource_creation_timeout_min: 1200
+      resource_creation_timeout_max: 14400
+      log_dir: /var/log/ranger-agent
+      local_repo: ranger_repo
+      resource_status_check_wait: 15
+    api:
+      host: 0.0.0.0
+      port: 9010
+    ord_credentials:
+      auth_url: http://127.0.0.1:5000/v2.0
+      user_name: admin
+      password: ranger-agent
+      tenant_name: admin
+      openstack_client_http_timeout: 360
+      https_insecure: False
+    database:
+      db_connection: mysql://root:devstack@127.0.0.1/ord?charset=utf8
+    oslo_messaging_rabbit:
+      rabbit_userid: stackrabbit
+      rabbit_password: devstack
+      rabbit_hosts: 127.0.0.1
+      rabbit_port: 5672
+    orm:
+      orm_template_repo_url: git@127.0.0.1:/home/repo/ranger_repo.git
+      rds_listener_endpoint: http://127.0.0.1:8777/v1/rds/status
+      repo_pull_check_wait: 2
+      retry_limits: 5
+    keystone_authtoken:
+      auth_type: password
+      auth_version: v3
+      memcache_security_strategy: ENCRYPT
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: ranger-agent-keystone-admin
+    user: ranger-agent-keystone-user
+  oslo_db:
+    admin: ranger-agent-db-admin
+    user: ranger-agent-db-user
+  oslo_db_api:
+    admin: ranger-agent-api-admin
+    user: ranger-agent-api-user
+
+
+# typically overriden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  cluster_domain_suffix: cluster.local
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: devstack 
+      user:
+        username: root
+        password: devstack
+    hosts:
+      default: mariadb
+    host_fqdn_override:
+      default: null
+    path: /ord
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+  oslo_messaging:
+    auth:
+      admin:
+        username: stackrabbit
+        password: devstack
+      user:
+        username: rabbitmq
+        password: password
+    hosts:
+      default: rabbitmq
+    host_fqdn_override:
+      default: null
+    path: /
+    scheme: rabbit
+    port:
+      amqp:
+        default: 5672
+  identity:
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: devstack
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      user:
+        role: admin
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
+
+    hosts:
+      default: keystone-api
+      public: keystone
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      admin:
+        default: 35357
+      api:
+        default: 80
+
+pod:
+  user:
+    aic_ord:
+      uid: 1000
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
+    ranger_agent_api:
+      init_container: null
+      ranger_agent_api:
+    ranger_agent_engine:
+      init_container: null
+      ranger_agent_engine:
+    ranger_agent_tests:
+      init_container: null
+      ranger_agent_tests:
+    ranger_agent_bootstrap:
+      init_container: null
+      ranger_agent_bootstrap:
+
+
+  replicas:
+    ranger_agent_api: 1
+    ranger_agent_engine: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+      daemonsets:
+        pod_replacement_strategy: RollingUpdate
+        ranger_agent_api:
+          enabled: true
+          min_ready_seconds: 0
+          max_unavailable: 1
+        ranger_agent_engine:
+          enabled: true
+          min_ready_seconds: 0
+          max_unavailable: 1
+
+    disruption_budget:
+      ranger_agent_api:
+        min_available: 0
+      ranger_agent_engine:
+        min_available: 0
+    termination_grace_period:
+      ranger_agent_api:
+        timeout: 30
+      ranger_agent_engine:
+        timeout: 30
+  resources:
+    enabled: false
+    ranger_agent_api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    ranger_agent_engine:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    ssh:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_drop:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_ranger_agent_api: true
+  deployment_ranger_agent_engine: true
+  ingress_ranger_agent_api: true
+  job_bootstrap: true
+  job_db_init: true
+  job_db_sync: true
+  job_db_drop: false
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  pdb_osapi: true
+  pod_rally_test: true
+  secret_db_api: true
+  secret_db: true
+  service_ingress_metadata: true
+  service_ingress_osapi: true
+  service_osapi: true
