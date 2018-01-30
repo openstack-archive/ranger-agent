@@ -45,23 +45,19 @@ RUN pip install --default-timeout=100 -r requirements.txt
 RUN python setup.py install
 
 RUN cd ~/ \
-    && rm -fr /tmp/ranger-agent \
+    && rm -fr /tmp/ranger-agent \ 
     && mkdir /var/log/ranger-agent
 
 # Create user aic-ord
 RUN useradd -ms /bin/bash aic-ord
 
-
-
-COPY .ssh /home/aic-ord/.ssh
 # Change permissions
 RUN chown -R aic-ord: /home/aic-ord \
-    && chmod 700 /home/aic-ord/.ssh \
     && chown -R aic-ord: /etc/ord \
     && chown -R aic-ord: /var/log/ranger-agent
 
 # Set work directory
-USER aic-ord
+USER aic-ord 
 WORKDIR /home/aic-ord/
 
 
