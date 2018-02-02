@@ -28,7 +28,7 @@ from oslo_log import log as logging
 CONF = cfg.CONF
 
 api_db_opts = [
-    cfg.StrOpt('db_connection',
+    cfg.StrOpt('connection',
                help='The SQLAlchemy connection string to use to connect to '
                     'the ORD database.',
                secret=True),
@@ -58,7 +58,7 @@ _LOCK = threading.Lock()
 def _create_facade(conf_group):
 
     return db_session.EngineFacade(
-        sql_connection=conf_group.db_connection,
+        sql_connection=conf_group.connection,
         autocommit=True,
         expire_on_commit=False,
         mysql_sql_mode=conf_group.mysql_sql_mode,
