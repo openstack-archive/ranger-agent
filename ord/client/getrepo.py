@@ -38,7 +38,7 @@ ORM_OPTS = [
 
 cfg.CONF.register_opts(ORM_OPTS, group='orm')
 LOG = logging.getLogger(__name__)
-
+subprocess._has_poll = False
 
 class TemplateRepoClient(object):
 

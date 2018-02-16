@@ -12,6 +12,7 @@ apt -y install git \
 netcat \
 netbase \
 curl \
+openssh-server \
 python-minimal \
 python-setuptools \
 python-pip \
@@ -45,17 +46,18 @@ RUN pip install --default-timeout=100 -r requirements.txt
 RUN python setup.py install
 
 RUN cd ~/ \
+    && rm /etc/ord/* \
     && rm -fr /tmp/ranger-agent \
     && mkdir /var/log/ranger-agent
 
-# Create user aic-ord
-RUN useradd -ms /bin/bash aic-ord
+# Create user ranger_agent
+RUN useradd -u 1000 -ms /bin/bash ranger_agent 
 
 # Change permissions
-RUN chown -R aic-ord: /home/aic-ord \
-    && chown -R aic-ord: /etc/ord \
-    && chown -R aic-ord: /var/log/ranger-agent
+RUN chown -R ranger_agent: /home/ranger_agent \
+    && chown -R ranger_agent: /etc/ord \
+    && chown -R ranger_agent: /var/log/ranger-agent
 
 # Set work directory
-USER aic-ord
-WORKDIR /home/aic-ord/
+USER ranger_agent
+WORKDIR /home/ranger_agent/
