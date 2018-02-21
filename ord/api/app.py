@@ -83,7 +83,7 @@ def setup_app(pecan_config=None, extra_hooks=None):
         guess_content_type_from_ext=False
     )
 
-    transport = messaging.get_transport(cfg.CONF)
+    transport = messaging.get_notification_transport(cfg.CONF)
     target = messaging.Target(topic='ord-listener-q', server=cfg.CONF.host)
     endpoints = [api.ListenerQueueHandler()]
     server = messaging.get_rpc_server(transport,

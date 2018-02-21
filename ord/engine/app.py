@@ -23,7 +23,7 @@ def start():
     engine = Engine()
 
     # start Notify message listener
-    transport = messaging.get_transport(cfg.CONF)
+    transport = messaging.get_notification_transport(cfg.CONF)
 
     target = messaging.Target(topic='ord-notifier-q', server=cfg.CONF.host)
 

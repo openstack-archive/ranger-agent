@@ -26,7 +26,7 @@ class RpcAPI(object):
         super(RpcAPI, self).__init__()
 
         self.target = messaging.Target(topic='ord-notifier-q')
-        self.transport = messaging.get_transport(cfg.CONF)
+        self.transport = messaging.get_notification_transport(cfg.CONF)
         self._client = messaging.RPCClient(self.transport, self.target)
 
     def invoke_notifier_rpc(self, ctxt, payload):

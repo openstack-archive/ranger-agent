@@ -28,7 +28,7 @@ class RpcEngine(object):
         super(RpcEngine, self).__init__()
         try:
             self.target = messaging.Target(topic='ord-listener-q')
-            self.transport = messaging.get_transport(cfg.CONF)
+            self.transport = messaging.get_notification_transport(cfg.CONF)
             self._client = messaging.RPCClient(self.transport, self.target)
         except Exception as exception:
             LOG.critical(
