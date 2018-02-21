@@ -4,7 +4,7 @@
 #
 pbr>=1.6
 oslo.config>=3.14.0
-oslo.messaging>=5.2.0
+oslo.messaging>=5.29.0
 oslo.serialization>=1.10.0
 oslo.db>=4.10.0,!=4.13.1,!=4.13.2
 oslo.log>=1.14.0
