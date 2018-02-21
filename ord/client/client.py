@@ -14,39 +14,38 @@
 
 from glanceclient import client as glance
 from heatclient import client as heat
-from keystoneclient import discover as keystone_discover
-from keystoneclient.v2_0 import client as keystone_v2
+from keystoneclient.auth.identity import v3
+from keystoneclient import session as ksc_session
 from keystoneclient.v3 import client as keystone_v3
 from oslo_config import cfg
 
 from ord.common import exceptions as exc
 from ord.openstack.common import log as logging
 
-
-# FIXME: we definetly must change this group name. It very confusing.
-OPT_GROUP = cfg.OptGroup(name='ord_credentials', title='ORD Credentials')
+OPT_GROUP = cfg.OptGroup(name='keystone_authtoken',
+                         title='Keystone Configurations')
 SERVICE_OPTS = [
-    cfg.StrOpt('project_id', default='',
-               help="project id used by nova driver of service vm extension"),
-    cfg.StrOpt('auth_url', default='http://0.0.0.0:5000/v2.0',
-               help="auth URL used by nova driver of service vm extension"),
-    cfg.StrOpt('user_name', default='',
-               help="user name used by nova driver of service vm extension"),
+    cfg.StrOpt('project_name', default='service',
+               help="project name  used to stack heat resources"),
+    cfg.StrOpt('auth_url', default='',
+               help="auth url used by ranger agent to invoke keystone apis"),
+    cfg.StrOpt('username', default='',
+               help="user name used by ranger agent to invoke keystone apis"),
     cfg.StrOpt('password', default='', secret=True,
-               help="password used by nova driver of service vm extension"),
-    cfg.StrOpt('tenant_name', default='',
-               help="tenant name used by nova driver of service vm "
-               "extension"),
-    cfg.FloatOpt("openstack_client_http_timeout", default=180.0,
-                 help="HTTP timeout for any of OpenStack service in seconds"),
-    cfg.BoolOpt("https_insecure", default=False,
-                help="Use SSL for all OpenStack API interfaces"),
+               help="password used by ranger agent to invoke keystone apis"),
+    cfg.StrOpt('project_domain_name', default='default',
+               help="default project domain "
+               "used by ranger agent to invoke keystone apis"),
+    cfg.StrOpt('auth_version', default='v3', help="Keystone version"),
+    cfg.StrOpt("user_domain_name", default='default',
+               help="default project domain "
+               "used by ranger agent to invoke keystone apis"),
     cfg.StrOpt("https_cacert", default=None,
-               help="Path to CA server certificate for SSL")
+               help="Path to CA server certificate for SSL"),
 ]
 
 cfg.CONF.register_opts(SERVICE_OPTS, OPT_GROUP)
-CONF = cfg.CONF.ord_credentials
+CONF = cfg.CONF.keystone_authtoken
 
 LOG = logging.getLogger(__name__)
 
@@ -68,13 +67,17 @@ def cached(func):
 
 
 def create_keystone_client(args):
-    discover = keystone_discover.Discover(auth_url=args['auth_url'])
-    for version_data in discover.version_data():
-        version = version_data['version']
-        if version[0] <= 2:
-            return keystone_v2.Client(**args)
-        elif version[0] == 3:
-            return keystone_v3.Client(**args)
+    auth = v3.Password(auth_url=args['auth_url'],
+                       username=args['username'],
+                       password=args['password'],
+                       project_name=args['project_name'],
+                       user_domain_name=args['project_name'],
+                       project_domain_name=args['project_name'])
+    session = ksc_session.Session(auth=auth)
+    return keystone_v3.Client(session=session,
+                              auth_url=args['auth_url'],
+                              username=args['username'],
+                              password=args['password'])
 
 
 class Clients(object):
@@ -90,15 +93,14 @@ class Clients(object):
     def keystone(self):
         """Returns keystone Client."""
         params = {
-            'username': CONF.user_name,
+            'username': CONF.username,
             'password': CONF.password,
             'auth_url': CONF.auth_url,
+            'project_name': CONF.project_name,
+            'user_domain_name': CONF.user_domain_name,
+            'project_domain_name': CONF.project_domain_name,
+            'https_cacert': CONF.https_cacert
         }
-
-        if CONF.project_id:
-            params['tenant_id'] = CONF.project_id
-        else:
-            params['tenant_name'] = CONF.tenant_name
         try:
             client = create_keystone_client(params)
             if client.auth_ref is None:
@@ -125,10 +127,8 @@ class Clients(object):
                 timeout = CONF.openstack_client_http_timeout
                 client = heat.Client(version,
                                      endpoint=heat_api_url,
-                                     token=auth_token,
-                                     timeout=timeout,
-                                     insecure=CONF.https_insecure,
-                                     cacert=CONF.https_cacert)
+                                     cacert=CONF.https_cacert,
+                                     token=auth_token)
                 return client, kc
             except Exception as ex:
                 try:
@@ -159,8 +159,6 @@ class Clients(object):
                 client = glance.Client(version,
                                        endpoint=glance_api_url,
                                        token=auth_token,
-                                       timeout=timeout,
-                                       insecure=CONF.https_insecure,
                                        cacert=CONF.https_cacert)
                 return client, kc
             except Exception as ex:
