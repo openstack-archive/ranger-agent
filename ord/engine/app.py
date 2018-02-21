@@ -23,7 +23,7 @@ def start():
     engine = Engine()
 
     # start Notify message listener
-    transport = messaging.get_transport(cfg.CONF)
+    transport = messaging.get_rpc_transport(cfg.CONF)
 
     target = messaging.Target(topic='ord-notifier-q', server=cfg.CONF.host)
 
@@ -32,7 +32,7 @@ def start():
     server = messaging.get_rpc_server(transport,
                                       target,
                                       endpoints,
-                                      executor='blocking')
+                                      executor='eventlet')
 
     try:
         server.start()
