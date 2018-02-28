@@ -17,7 +17,7 @@
 import setuptools
 from setuptools import find_packages
 
-setuptools.setup(name="ord", version="2016.3.0",
+setuptools.setup(name="ranger-agent", version="2016.3.0",
                  packages=find_packages(),
                  include_package_data=True,
                  setup_requires=['pbr'],
