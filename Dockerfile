@@ -46,7 +46,7 @@ RUN pip install --default-timeout=100 -r requirements.txt
 RUN python setup.py install
 
 RUN cd ~/ \
-    && rm /etc/ord/* \
+    && rm /etc/ranger-agent/* \
     && rm -fr /tmp/ranger-agent \
     && mkdir /var/log/ranger-agent
 
@@ -55,7 +55,7 @@ RUN useradd -u 1000 -ms /bin/bash ranger_agent
 
 # Change permissions
 RUN chown -R ranger_agent: /home/ranger_agent \
-    && chown -R ranger_agent: /etc/ord \
+    && chown -R ranger_agent: /etc/ranger-agent \
     && chown -R ranger_agent: /var/log/ranger-agent
 
 # Set work directory
