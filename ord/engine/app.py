@@ -15,8 +15,13 @@
 
 from ord.engine.engine import Engine
 from ord.engine.engine import QueueHandler
+from ord.openstack.common import log as logging
 from oslo_config import cfg
 import oslo_messaging as messaging
+import time
+
+
+LOG = logging.getLogger(__name__)
 
 
 def start():
@@ -36,7 +41,10 @@ def start():
 
     try:
         server.start()
-        server.wait()
+        LOG.info("messaging engine started")
+        while True:
+            time.sleep(1)
     except KeyboardInterrupt:
-        # Add termination handling here
-        pass
+        LOG.info("messaging engine stopped with ctrl-c")
+        server.stop()
+        server.wait()
