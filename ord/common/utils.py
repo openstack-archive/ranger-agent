@@ -44,7 +44,7 @@ def load_file(name):
         payload = fd.read()
     except IOError as e:
         raise exc.InternalError(
-            'Can\'t load {!r}: {}'.format(e.filename, e.message))
+            'Can\'t load {!r}: {}'.format(e.filename, e.errno))
     return payload
 
 
