@@ -24,12 +24,12 @@ libffi-dev \
 libssl-dev --no-install-recommends \
 && apt-get clean \
 && rm -rf \
-     /var/lib/apt/lists/* \
-     /tmp/* \
-     /var/tmp/* \
-     /usr/share/man \
-     /usr/share/doc \
-     /usr/share/doc-base
+    /var/lib/apt/lists/* \
+    /tmp/* \
+    /var/tmp/* \
+    /usr/share/man \
+    /usr/share/doc \
+    /usr/share/doc-base
 
 RUN pip install wheel
 
@@ -56,3 +56,15 @@ RUN chown -R ranger_agent: /home/ranger_agent \
 # Set work directory
 USER ranger_agent
 WORKDIR /home/ranger_agent/
+
+# Authorize SSH Host
+RUN mkdir -p /home/ranger_agent/.ssh \
+    && chmod 0700 /home/ranger_agent/.ssh \
+    && ssh-keyscan github.com > /home/ranger_agent/.ssh/known_hosts
+
+# Add the keys and set permissions
+RUN echo "$ssh_prv_key" > /home/ranger_agent/.ssh/id_rsa \
+    && echo "$ssh_pub_key" > /home/ranger_agent/.ssh/id_rsa.pub \
+    && chmod 600 /home/ranger_agent/.ssh/id_rsa \
+    && chmod 600 /home/ranger_agent/.ssh/id_rsa.pub
+
