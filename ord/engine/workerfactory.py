@@ -321,7 +321,8 @@ class WorkerThread(threading.Thread):
         status_original = rds_payload.get('rds-listener')['status']
 
         try:
-            self.extract_resource_extra_metadata(rds_payload, status_original)
+            self.extract_resource_extra_metadata(rds_payload,
+                                                 status_original)
         except Exception as exception:
             LOG.error("Unexpected error collecting extra \
             Image Parameter %s", exception)
@@ -336,10 +337,12 @@ class WorkerThread(threading.Thread):
                 self.template_status_id)
             status = target_data.get('status')
             if status == utils.STATUS_RDS_ERROR:
-                LOG.debug("Retrying for RDS listener response %s", max_range)
+                LOG.debug("Retrying for RDS listener response %s",
+                          max_range)
                 rds_payload.get('rds-listener')['status'] = status_original
-                # if image_payload:
-                #    rds_payload.get('rds-listener')['status'] = image_payload
+    #            if image_payload:
+    #               rds_payload.get('rds-listener')['status']
+    #                    = image_payload
                 self._rpcengine. \
                     invoke_listener_rpc(res_ctxt, json.dumps(rds_payload))
 
