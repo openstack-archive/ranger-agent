@@ -20,6 +20,7 @@ ca-certificates \
 openstack-pkg-tools \
 gcc \
 g++ \
+vim \
 libffi-dev \
 libssl-dev --no-install-recommends \
 && apt-get clean \
@@ -41,18 +42,24 @@ RUN pip install --default-timeout=100 -r requirements.txt
 
 RUN python setup.py install
 
-RUN cd ~/ \
-    && rm -fr /tmp/ranger-agent \
-    && mkdir /var/log/ranger-agent
-
 # Create user ranger_agent
 RUN useradd -u 1000 -ms /bin/bash ranger_agent
 
 # Change permissions
 RUN chown -R ranger_agent: /home/ranger_agent \
     && chown -R ranger_agent: /etc/ranger-agent \
-    && chown -R ranger_agent: /var/log/ranger-agent
+    && mkdir /var/log/ranger-agent \
+    && chown -R ranger_agent: /var/log/ranger-agent \
+    && cp -fr tools/.ssh  /home/ranger_agent/ \
+    && chown ranger_agent: /home/ranger_agent/.ssh \
+    && chmod 700 -R /home/ranger_agent/.ssh \
+    && chmod 644 /home/ranger_agent/.ssh/config \
+    && chmod 600 /home/ranger_agent/.ssh/ranger_agent \
+    && cd ~/ \
+    && rm -fr /tmp/ranger-agent 
+    
+
 
 # Set work directory
-USER ranger_agent
+USER root
 WORKDIR /home/ranger_agent/
