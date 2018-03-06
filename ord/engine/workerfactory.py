@@ -14,6 +14,7 @@
 
 import itertools
 import json
+import os
 from oslo_config import cfg
 from random import SystemRandom
 import six
@@ -219,6 +220,7 @@ class WorkerThread(threading.Thread):
             LOG.critical('Unhandled exception into %s', type(self).__name__,
                          exc_info=True)
         finally:
+            self._cleanup_template(self.template_path)
             LOG.info("Thread Exiting :: %s", self.threadID)
             WorkerFactory.removeWorker(self.threadID)
 
@@ -265,6 +267,14 @@ class WorkerThread(threading.Thread):
                     args['rollback_status'] = True
 
             raise
+
+    def _cleanup_template(self):
+        try:
+            if os.path.isfile(self.template_path):
+                os.remove(self.template_path)
+                LOG.info("Removing template File :: %s", self.template_path)
+        except Exception as ex:
+            LOG.error("Error on cleanup of template File :: %s", ex)
 
     def _update_permanent_storage(self, error=None):
         args = {}

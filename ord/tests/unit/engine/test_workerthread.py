@@ -212,6 +212,7 @@ class TestWorkerThread(base.BaseTestCase):
         execute.return_value = 'OPERATION_STATUS'
         self.workerThread._update_permanent_storage = \
             save_results = mock.Mock()
+        self.workerThread._cleanup_template = mock.Mock()
         self.workerThread._send_operation_results = send_results = mock.Mock()
 
         self.workerThread.run()
@@ -227,6 +228,7 @@ class TestWorkerThread(base.BaseTestCase):
             side_effect=error)
         self.workerThread._update_permanent_storage = save_status = mock.Mock()
         self.workerThread._send_operation_results = send_results = mock.Mock()
+        self.workerThread._cleanup_template = mock.Mock()
 
         self.workerThread.run()
 
@@ -241,6 +243,7 @@ class TestWorkerThread(base.BaseTestCase):
             side_effect=error)
         self.workerThread._update_permanent_storage = save_status = mock.Mock()
         self.workerThread._send_operation_results = send_results = mock.Mock()
+        self.workerThread._cleanup_template = mock.Mock()
 
         self.workerThread.run()
 
