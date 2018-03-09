@@ -208,43 +208,60 @@ class TestWorkerThread(base.BaseTestCase):
         self.assertEqual('UPDATE_COMPLETE', status_transition.transitions[-1])
 
     def test_run(self):
+        self.workerThread._fetch_template = fetch_template = mock.Mock()
+        template_absolute_path = os.path.join(
+            os.path.expanduser('~'), self.local_repo, self.path_to_tempate)
+        fetch_template.return_value = template_absolute_path
         self.workerThread._execute_operation = execute = mock.Mock()
         execute.return_value = 'OPERATION_STATUS'
         self.workerThread._update_permanent_storage = \
             save_results = mock.Mock()
+        self.workerThread._cleanup_template = mock.Mock()
         self.workerThread._send_operation_results = send_results = mock.Mock()
 
         self.workerThread.run()
-
-        execute.assert_called_with()
+        fetch_template.assert_called_once_with()
+        execute.assert_called_with(template_absolute_path)
         save_results.assert_called_once_with()
         send_results.assert_called_once_with()
 
     def test_run_fail(self):
+        self.workerThread._fetch_template = fetch_template = mock.Mock()
+        template_absolute_path = os.path.join(
+            os.path.expanduser('~'), self.local_repo, self.path_to_tempate)
+        fetch_template.return_value = template_absolute_path
         error = exc.StackOperationError(operation='unittest', stack='dummy')
 
         self.workerThread._execute_operation = execute = mock.Mock(
             side_effect=error)
         self.workerThread._update_permanent_storage = save_status = mock.Mock()
         self.workerThread._send_operation_results = send_results = mock.Mock()
+        self.workerThread._cleanup_template = mock.Mock()
 
         self.workerThread.run()
 
-        execute.assert_called_once_with()
+        fetch_template.assert_called_once_with()
+        execute.assert_called_with(template_absolute_path)
         save_status.assert_called_once_with(error)
         send_results.assert_called_once_with()
 
     def test_run_fail_uncontrolled(self):
         error = ZeroDivisionError()
 
+        self.workerThread._fetch_template = fetch_template = mock.Mock()
+        template_absolute_path = os.path.join(
+            os.path.expanduser('~'), self.local_repo, self.path_to_tempate)
+        fetch_template.return_value = template_absolute_path
         self.workerThread._execute_operation = execute = mock.Mock(
             side_effect=error)
         self.workerThread._update_permanent_storage = save_status = mock.Mock()
         self.workerThread._send_operation_results = send_results = mock.Mock()
+        self.workerThread._cleanup_template = mock.Mock()
 
         self.workerThread.run()
 
-        execute.assert_called_once_with()
+        fetch_template.assert_called_once_with()
+        execute.assert_called_with(template_absolute_path)
 
     def test_update_permanent_storage(self):
         db_api = self.patch('ord.engine.workerfactory.db_api')

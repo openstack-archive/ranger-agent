@@ -14,6 +14,7 @@
 
 import itertools
 import json
+import os
 from oslo_config import cfg
 from random import SystemRandom
 import six
@@ -193,11 +194,13 @@ class WorkerThread(threading.Thread):
         LOG.debug("Thread Starting :: %s", self.threadID)
         LOG.debug("operation=%s, stack_name=%s, path_to_tempate=%s",
                   self.operation, self.stack_name, self.template_path)
+        template_absolute_path = self.template_path
         try:
             if self._is_engine_initialized():
                 LOG.debug('Client initialization complete')
                 try:
-                    self._execute_operation()
+                    template_absolute_path = self._fetch_template()
+                    self._execute_operation(template_absolute_path)
                 except exc.ORDException as e:
                     LOG.error('%s', e.message)
                     self._update_permanent_storage(e)
@@ -219,6 +222,7 @@ class WorkerThread(threading.Thread):
             LOG.critical('Unhandled exception into %s', type(self).__name__,
                          exc_info=True)
         finally:
+            self._cleanup_template(template_absolute_path)
             LOG.info("Thread Exiting :: %s", self.threadID)
             WorkerFactory.removeWorker(self.threadID)
 
@@ -234,8 +238,7 @@ class WorkerThread(threading.Thread):
             return False
         return True
 
-    def _execute_operation(self):
-        template = self._fetch_template()
+    def _execute_operation(self, template):
 
         if self.operation == utils.OPERATION_CREATE:
             stack = self._create_stack(template)
@@ -265,6 +268,15 @@ class WorkerThread(threading.Thread):
                     args['rollback_status'] = True
 
             raise
+
+    def _cleanup_template(self, template_absolute_path):
+        LOG.info("Removing template File :: %s", template_absolute_path)
+        try:
+            if os.path.isfile(template_absolute_path):
+                os.remove(template_absolute_path)
+                LOG.info("Template File Removed")
+        except Exception as ex:
+            LOG.error("Error on cleanup of template File :: %s", ex)
 
     def _update_permanent_storage(self, error=None):
         args = {}
