@@ -49,7 +49,10 @@ CONF.register_opts([
     cfg.IntOpt('resource_creation_timeout_min', default=1200,
                help='max wait time for flavor and customer stacks'),
     cfg.IntOpt('resource_creation_timeout_max', default=14400,
-               help='max wait time for image stacks')
+               help='max wait time for image stacks'),
+    cfg.BoolOpt('enable_rds_callback_check',
+                default=True,
+                help='validate rds api is reachable')
 ])
 
 LOG = logging.getLogger(__name__)
@@ -314,40 +317,45 @@ class WorkerThread(threading.Thread):
             self.template_status_id, status, **args)
 
     def _send_operation_results(self):
-        rds_payload = self._prepare_rds_payload()
-        res_ctxt = \
-            {'request-id': rds_payload.get('rds-listener')['request-id']}
-        LOG.debug("----- RPC API Payload to RDS %r", rds_payload)
-        status_original = rds_payload.get('rds-listener')['status']
+        if CONF.enable_rds_callback_check:
+            rds_payload = self._prepare_rds_payload()
+            res_ctxt = \
+                {'request-id': rds_payload.get('rds-listener')['request-id']}
+            LOG.debug("----- RPC API Payload to RDS %r", rds_payload)
+            status_original = rds_payload.get('rds-listener')['status']
 
-        try:
-            self.extract_resource_extra_metadata(rds_payload, status_original)
-        except Exception as exception:
-            LOG.error("Unexpected error collecting extra \
-            Image Parameter %s", exception)
+            try:
+                self.extract_resource_extra_metadata(rds_payload,
+                                                     status_original)
+            except Exception as exception:
+                LOG.error("Unexpected error collecting extra \
+                Image Parameter %s", exception)
 
-        max_range = int(CONF.orm.retry_limits)
-        self._rpcengine. \
-            invoke_listener_rpc(res_ctxt, json.dumps(rds_payload))
-        while max_range - 1 > 0:
-            LOG.debug('Waiting for invoke listener')
-            time.sleep(CONF.resource_status_check_wait)
-            target_data = db_api.retrieve_target_by_status(
-                self.template_status_id)
-            status = target_data.get('status')
-            if status == utils.STATUS_RDS_ERROR:
-                LOG.debug("Retrying for RDS listener response %s", max_range)
-                rds_payload.get('rds-listener')['status'] = status_original
-                # if image_payload:
-                #    rds_payload.get('rds-listener')['status'] = image_payload
-                self._rpcengine. \
-                    invoke_listener_rpc(res_ctxt, json.dumps(rds_payload))
+            max_range = int(CONF.orm.retry_limits)
+            self._rpcengine. \
+                invoke_listener_rpc(res_ctxt, json.dumps(rds_payload))
+            while max_range - 1 > 0:
+                LOG.debug('Waiting for invoke listener')
+                time.sleep(CONF.resource_status_check_wait)
+                target_data = db_api.retrieve_target_by_status(
+                    self.template_status_id)
+                status = target_data.get('status')
+                if status == utils.STATUS_RDS_ERROR:
+                    LOG.debug("Retrying for RDS listener response %s",
+                              max_range)
+                    rds_payload.get('rds-listener')['status'] = status_original
+    #             if image_payload:
+    #                rds_payload.get('rds-listener')['status'] = image_payload
+                    self._rpcengine. \
+                        invoke_listener_rpc(res_ctxt, json.dumps(rds_payload))
 
-            if status != utils.STATUS_RDS_SUCCESS:
-                LOG.debug("Retrying for api response")
-                max_range = max_range - 1
-            else:
-                break
+                if status != utils.STATUS_RDS_SUCCESS:
+                    LOG.debug("Retrying for api response")
+                    max_range = max_range - 1
+                else:
+                    break
+        else:
+            LOG.debug("RDS callback check disabled")
 
     def _fetch_template(self):
         """Fetch template from document storage
