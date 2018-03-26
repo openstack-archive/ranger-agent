@@ -49,7 +49,10 @@ CONF.register_opts([
     cfg.IntOpt('resource_creation_timeout_min', default=1200,
                help='max wait time for flavor and customer stacks'),
     cfg.IntOpt('resource_creation_timeout_max', default=14400,
-               help='max wait time for image stacks')
+               help='max wait time for image stacks'),
+    cfg.BoolOpt('enable_rds_callback_check',
+                default=True,
+                help='validate rds api is reachable')
 ])
 
 LOG = logging.getLogger(__name__)
@@ -210,14 +213,14 @@ class WorkerThread(threading.Thread):
                     self._update_permanent_storage(e)
                 else:
                     self._update_permanent_storage()
-
-            try:
-                self._send_operation_results()
-            except Exception:
-                LOG.critical('ORD_019 - INCOMPLETE OPERATION! Error during '
-                             'sending operation results. Called will never '
-                             'know about issue.')
-                raise
+            if CONF.enable_rds_callback_check:
+                try:
+                    self._send_operation_results()
+                except Exception:
+                    LOG.critical('ORD_019 - INCOMPLETE OPERATION! Error '
+                                 'during sending operation results. '
+                                 'Called will never know about issue.')
+                    raise
         except Exception:
             LOG.critical('Unhandled exception into %s', type(self).__name__,
                          exc_info=True)
