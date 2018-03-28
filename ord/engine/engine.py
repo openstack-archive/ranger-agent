@@ -15,25 +15,10 @@
 import ast
 from multiprocessing import Process
 import os
-from oslo_config import cfg
-
 
 from ord.client import rpcengine
 from ord.engine.workerfactory import WorkerFactory
 from ord.openstack.common import log as logging
-
-
-OPTS = [
-    cfg.StrOpt('local_repo',
-               default='aic-orm-resources-labs',
-               help='local repo from where the'
-                    'template yaml can be accessed from'),
-    cfg.StrOpt('region',
-               default='local',
-               help='Region'),
-]
-cfg.CONF.register_opts(OPTS)
-CONF = cfg.CONF
 
 LOG = logging.getLogger(__name__)
 
