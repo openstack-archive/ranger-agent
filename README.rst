@@ -30,15 +30,20 @@ Docker Container:
 
 1. $ `cd ranger-agent`
 
-2. $ `sudo docker build -t ranger-agent .`
+2. Update /ranger-agent/tools/.ssh/ranger_agent with your ssh key to your git repo
+   containing heat templates.
+   You can clone https://github.com/ranger-agent , but pull requests won't be accepted.
 
-3. $ `sudo docker run -h "ranger-agent" --net host -it --privileged  ranger-agent  bash`
-   Creating docker image and publish will be done by CICD jobs.For Refernce and validation manually image could push using..
+3. $ `sudo docker build -t ranger-agent .`
+
+4. $ `sudo docker run -h "ranger-agent" --net host -it --privileged  ranger-agent  bash`
+   Creating docker image and publish will be done by deployment jobs.
+   For Refernce and validation manually image could push using.
    a). $ `docker login <docker_user_id>`
    b). $ `docker tag ranger-agent <docker_user_id>/ranger-agent:0.1.0`
    c). $ `docker push <docker_user_id>/ranger-agent:0.1.0`
 
-4. This docker container will be used by helm chart to deploy
+5. This docker container will be used by helm chart to deploy ranger-agent.
 
 Manual:
 ------
@@ -59,5 +64,6 @@ Manual:
 	5. `sudo nohup ord-dbsync > /dev/null 2>&1 &`
 	6. `sudo nohup ord-engine > /dev/null 2>&1 &`
 
-6. If you want to reinstall and run ranger-agent again, make sure you run `./clear_install_files.sh` to remove previous installation files.
+6. If you want to reinstall and run ranger-agent again, make sure you run
+   `./clear_install_files.sh` to remove previous installation files.
 

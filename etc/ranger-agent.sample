@@ -1,0 +1,43 @@
+[DEFAULT]
+api_paste_config = /etc/ranger-agent/api-paste.ini
+api_workers = 1
+debug = false
+enable_rds_callback_check = false
+local_repo = ranger_repo
+log_dir = /var/log/ranger-agent
+ord_server_url = http://ranger-agent.openstack.svc.cluster.local:80
+pecan_debug = true
+region = RegionOne
+repo_connection_timeout = 120
+resource_creation_timeout_max = 14400
+resource_creation_timeout_min = 1200
+resource_status_check_wait = 15
+transport_url = rabbit://ranger-agent:password@rabbitmq.openstack.svc.cluster.local:5672/ranger-agent
+verbose = true
+
+[api]
+host = 0.0.0.0
+port = 9010
+
+[database]
+connection = mysql+pymysql://ranger-agent:password@mariadb.openstack.svc.cluster.local:3306/ord
+max_retries = -1
+
+[keystone_authtoken]
+auth_type = password
+auth_url = http://keystone-api.openstack.svc.cluster.local:80/v3
+auth_version = v3
+password = password
+project_domain_name = default
+project_name = service
+user_domain_name = default
+username = heat
+
+[orm]
+orm_template_repo_url = git@github.com:ranger-agent/templates.git
+rds_listener_endpoint = http://internal.ranger.com:8777/v1/rds/status
+repo_pull_check_wait = 2
+retry_limits = 5
+
+[oslo_messaging_notifications]
+driver = messagingv2
