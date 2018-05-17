@@ -29,7 +29,7 @@ ORM_OPTS = [
     cfg.Opt('repo_pull_check_wait',
             default='1',
             help='Wait Time'),
-    cfg.IntOpt('resource_status_check_wait', default=10,
+    cfg.IntOpt('resource_status_check_wait', default=15,
                help='delay in seconds between two retry call'),
     cfg.IntOpt('retry_limits',
                default=5,
@@ -68,18 +68,22 @@ class TemplateRepoClient(object):
         try:
             # initialize repo directory as a git repo
             cmd = 'git init {0}'.format(repopath)
-            self.run_git('GitRepoInit', cmd)
+            self.run_git('GitRepoInit', cmd, workdir=repopath)
             try:
                 # set remote origin
                 cmd = 'git -C {0} remote add origin {1}'.format(
                     repopath, repo)
-                self.run_git('GitRepoInit', cmd)
+                self.run_git('GitRepoInit', cmd, workdir=repopath)
             except Exception as repoexp:
                 pass
             # fetch origin
+            rem_lock_file = '{0}/.git/refs/remotes/origin/master.lock'\
+                .format(repopath)
+            if os.path.exists(rem_lock_file):
+                os.remove(rem_lock_file)
             cmd = 'git -C {0} fetch origin'.format(
                 repopath)
-            self.run_git('GitRepoInit', cmd)
+            self.run_git('GitRepoInit', cmd, workdir=repopath)
         except Exception as repoexp:
             self.git_repo_status = False
             LOG.critical("Failed to initialize Repo %s " % repoexp)
@@ -105,25 +109,21 @@ class TemplateRepoClient(object):
         if os.path.isfile(templatepath):
             os.remove(templatepath)
 
-        timeout_sec = cfg.CONF.orm.resource_status_check_wait
-
-        cmd = 'git -C {0} fetch origin'.format(workdir)
-        self.run_git('PullTemplate', cmd, timeout_sec)
-
         cmd = 'git -C {0} checkout FETCH_HEAD  -- {1}'.format(
             workdir, pathtotemplate)
-        self.run_git('PullTemplate', cmd, timeout_sec)
+        self.run_git('PullTemplate', cmd, workdir=workdir, is_timeout=True)
 
         LOG.debug("Template pull completed ...")
 
         return templatepath
 
-    def run_git(self, label, cmd, timeout_sec=None):
+    def run_git(self, label, cmd, workdir=None, is_timeout=False):
         LOG.info("Running cmd: '%s'", cmd)
         timed_out = False
         retry_left = CONF.orm.retry_limits
 
-        if timeout_sec is not None:
+        if is_timeout:
+            timeout_sec = cfg.CONF.resource_status_check_wait
             cmd = 'timeout -k {0}s {1}s {2}'.format(timeout_sec + 5,
                                                     timeout_sec, cmd)
             LOG.info('Setting cmd timeout to: %s seconds', timeout_sec)
@@ -169,6 +169,21 @@ class TemplateRepoClient(object):
                     LOG.warning("stderr: %s", proc_result)
                     LOG.warning("Retrying cmd '%s'. Retries left: %s",
                                 cmd, retry_left)
+                    if workdir is not None:
+                        try:
+                            rem_lock_file = '{0}/.git/refs/remotes/origin/master.lock'\
+                                .format(workdir)
+                            if os.path.exists(rem_lock_file):
+                                os.remove(rem_lock_file)
+                            fetch = 'git -C {0} fetch origin'.format(workdir)
+                            fetch_process = subprocess.Popen(
+                                shlex.split(fetch), stdout=subprocess.PIPE,
+                                shell=False, stderr=subprocess.PIPE)
+                            [stdout, stderr] = fetch_process.communicate()
+                            LOG.info("Run command '%s' to syncup"
+                                     " repo after error", fetch)
+                        except Exception:
+                            pass
 
         if process.returncode != 0:
             self.check_git_errors(label, proc_result)

@@ -43,7 +43,7 @@ class GetRepoTestCase(base.BaseTestCase):
         self.assertEqual(expected, result)
 
     def test_fail_pull_template(self):
-        path = os.path.abspath('')
+        path = os.path.abspath('test')
         testfile = 'tests/files/stack0.yaml'
         self.assertRaises(ORDException, self.git_inst.pull_template,
                           path, testfile)
