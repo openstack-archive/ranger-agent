@@ -19,6 +19,7 @@ import subprocess
 
 from ord.openstack.common import log as logging
 from oslo_config import cfg
+from oslo_utils import fileutils
 
 
 CONF = cfg.CONF
@@ -63,8 +64,7 @@ class TemplateRepoClient(object):
             "%s Setting up repo initiated ...", os.path.basename(repo))
 
         # create the git repo directory if not exists
-        if not os.path.isdir(repopath):
-            os.makedirs(repopath)
+        fileutils.ensure_tree(repopath)
         try:
             # initialize repo directory as a git repo
             cmd = 'git init {0}'.format(repopath)

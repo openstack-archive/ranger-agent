@@ -39,6 +39,7 @@ import traceback
 from oslo_config import cfg
 from oslo_serialization import jsonutils
 from oslo_utils import importutils
+from oslo_utils import fileutils
 import six
 from six import moves
 
@@ -224,8 +225,7 @@ def _get_log_file_path(binary=None):
         return logfile
 
     if logfile and logdir:
-        if not os.path.exists(logdir):
-            os.makedirs(logdir)
+        fileutils.ensure_tree(logdir)
         return os.path.join(logdir, logfile)
 
     if logdir:
