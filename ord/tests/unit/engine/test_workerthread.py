@@ -254,8 +254,8 @@ class TestWorkerThread(base.BaseTestCase):
         fetch_template.return_value = template_absolute_path
         self.workerThread._execute_operation = execute = mock.Mock(
             side_effect=error)
-        self.workerThread._update_permanent_storage = save_status = mock.Mock()
-        self.workerThread._send_operation_results = send_results = mock.Mock()
+        self.workerThread._update_permanent_storage = mock.Mock()
+        self.workerThread._send_operation_results = mock.Mock()
         self.workerThread._cleanup_template = mock.Mock()
 
         self.workerThread.run()
