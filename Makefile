@@ -18,6 +18,9 @@ IMAGE_PREFIX               ?= attcomdev
 IMAGE_TAG                  ?= ocata
 HELM                       ?= helm
 LABEL                      ?= commit-id
+PROXY                      ?= http://proxy.foo.com:8000
+NO_PROXY                   ?= localhost,127.0.0.1,.svc.cluster.local
+USE_PROXY                  ?= false
 
 IMAGE := ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/${IMAGE_NAME}:${IMAGE_TAG}
 
