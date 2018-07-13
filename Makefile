@@ -43,7 +43,18 @@ dry-run: clean
 # Make targets intended for use by the primary targets above.
 .PHONY: build_$(IMAGE_NAME)
 build_$(IMAGE_NAME):
-	docker build -t $(IMAGE) --label $(LABEL) -f Dockerfile .
+
+ifeq ($(USE_PROXY), true)
+	docker build --network host -t $(IMAGE) --label $(LABEL) -f images/drydock/Dockerfile \
+		--build-arg http_proxy=$(PROXY) \
+		--build-arg https_proxy=$(PROXY) \
+		--build-arg HTTP_PROXY=$(PROXY) \
+		--build-arg HTTPS_PROXY=$(PROXY) \
+		--build-arg no_proxy=$(NO_PROXY) \
+		--build-arg NO_PROXY=$(NO_PROXY) .
+else
+	docker build --network host -t $(IMAGE) --label $(LABEL) -f images/drydock/Dockerfile .
+endif
 
 .PHONY: clean
 clean:
