@@ -1,0 +1,9 @@
+Code-Review+2: STEW TY <st3wty@att.com>
+Workflow+1: Nicholas Jones <nj762h@att.com>
+Workflow+1: STEW TY <st3wty@att.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 16 Jul 2018 15:45:53 +0000
+Reviewed-on: https://review.openstack.org/582683
+Project: openstack/ranger-agent
+Branch: refs/heads/master
