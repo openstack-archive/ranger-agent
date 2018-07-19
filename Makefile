@@ -48,7 +48,7 @@ dry-run: clean
 build_$(IMAGE_NAME):
 
 ifeq ($(USE_PROXY), true)
-	docker build --network host -t $(IMAGE) --label $(LABEL) -f images/drydock/Dockerfile \
+	docker build --network host -t $(IMAGE) --label $(LABEL) -f Dockerfile \
 		--build-arg http_proxy=$(PROXY) \
 		--build-arg https_proxy=$(PROXY) \
 		--build-arg HTTP_PROXY=$(PROXY) \
@@ -56,7 +56,7 @@ ifeq ($(USE_PROXY), true)
 		--build-arg no_proxy=$(NO_PROXY) \
 		--build-arg NO_PROXY=$(NO_PROXY) .
 else
-	docker build --network host -t $(IMAGE) --label $(LABEL) -f images/drydock/Dockerfile .
+	docker build --network host -t $(IMAGE) --label $(LABEL) -f Dockerfile .
 endif
 
 .PHONY: clean
