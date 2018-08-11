@@ -12,3 +12,6 @@ ranger_agent.egg-info
 .settings/
 .tox/
 localrc
+
+# Files created by releasenotes build
+releasenotes/build
