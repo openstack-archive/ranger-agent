@@ -91,7 +91,7 @@ logging_cli_opts = [
                deprecated_name='logfile',
                help='(Optional) Name of log file to output to. '
                     'If no default is set, logging will go to stdout.'),
-    cfg.StrOpt('log-dir',
+    cfg.StrOpt('log_dir',
                deprecated_name='logdir',
                help='(Optional) The base directory used for relative '
                     '--log-file paths.'),
