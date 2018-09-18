@@ -1,0 +1,9 @@
+Code-Review+2: Hari <hosingh000@gmail.com>
+Code-Review+2: STEW TY <st3wty@att.com>
+Workflow+1: Hari <hosingh000@gmail.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Tue, 18 Sep 2018 19:00:07 +0000
+Reviewed-on: https://review.openstack.org/539811
+Project: openstack/ranger-agent
+Branch: refs/heads/master
