@@ -218,13 +218,14 @@ def _get_binary_name():
 
 
 def _get_log_file_path(binary=None):
-    logfile = sys.argv[0].split('/')[-1] + '.log'
+    logfile = CONF.log_file
     logdir = CONF.log_dir
 
     if logfile and not logdir:
-        return logfile
+        return sys.argv[0].split('/')[-1] + '.log'
 
     if logfile and logdir:
+        logfile = sys.argv[0].split('/')[-1] + '.log'
         fileutils.ensure_tree(logdir)
         return os.path.join(logdir, logfile)
 
