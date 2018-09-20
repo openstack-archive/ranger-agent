@@ -1,0 +1,9 @@
+Code-Review+2: STEW TY <st3wty@att.com>
+Code-Review+2: Aaron McLean <am9518@att.com>
+Workflow+1: Aaron McLean <am9518@att.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 20 Sep 2018 15:14:28 +0000
+Reviewed-on: https://review.openstack.org/603872
+Project: openstack/ranger-agent
+Branch: refs/heads/master
