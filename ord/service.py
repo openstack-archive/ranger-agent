@@ -62,6 +62,6 @@ def prepare_service(argv=None):
                      default_log_levels=log_levels)
     if argv is None:
         argv = sys.argv
-    cfg.CONF(argv[1:], project='ord', validate_default_values=True)
-    log.setup('ord')
+    cfg.CONF(argv[1:], project='ranger-agent', validate_default_values=True)
+    log.setup('ranger')
     # messaging.setup()
