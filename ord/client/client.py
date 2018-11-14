@@ -76,6 +76,7 @@ def create_keystone_client(args):
     session = ksc_session.Session(auth=auth)
     return keystone_v3.Client(session=session,
                               auth_url=args['auth_url'],
+                              project_name=args['project_name'],
                               username=args['username'],
                               password=args['password'])
 
