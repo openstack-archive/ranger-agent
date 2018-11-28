@@ -101,7 +101,7 @@ class OrdApiTestCase(base.BaseTestCase):
             mock_response = mock.Mock()
             mock_response.getcode.return_value = 200
 
-        def urlrequest_mock_method(url, payload, headers):
+        def urlrequest_mock_method(url, payload, headers, unverifiable=False):
             return "Failure"
 
         def fake_update_target(*args, **kwds):
@@ -129,7 +129,7 @@ class OrdApiTestCase(base.BaseTestCase):
         payload = str(kwargs)
         output_status = 'STATUS_RDS_SUCCESS'
 
-        def mock_method(url, payload, headers):
+        def mock_method(url, payload, headers, unverifiable=False):
             return "Failure"
         self.stubs.Set(urllib2, 'Request', mock_method)
 
@@ -163,7 +163,7 @@ class OrdApiTestCase(base.BaseTestCase):
         payload = str(kwargs)
         output_status = 'Error_RDS_Dispatch'
 
-        def mock_method(url, payload, headers):
+        def mock_method(url, payload, headers, unverifiable=False):
             return "Success"
         self.stubs.Set(urllib2, 'Request', mock_method)
 

@@ -68,11 +68,11 @@ class ListenerQueueHandler(object):
             listener_response_body = json.loads(payload)
             LOG.debug(" Payload to RDS Listener %s " % listener_response_body)
             headers = {'Content-type': 'application/json'}
-
             rds_url = CONF.orm.rds_listener_endpoint
             req = urllib2.Request(rds_url,
                                   json.dumps(listener_response_body),
-                                  headers)
+                                  headers,
+                                  unverifiable=False)
             args = {}
             template_status_id = None
             if 'rds-listener' in listener_response_body:
