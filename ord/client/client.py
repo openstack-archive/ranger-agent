@@ -127,6 +127,7 @@ class Clients(object):
                 auth_token = kc.auth_token
                 client = heat.Client(version,
                                      endpoint=heat_api_url,
+                                     project_name=CONF.project_name,
                                      cacert=CONF.https_cacert,
                                      token=auth_token)
                 return client, kc
@@ -157,6 +158,7 @@ class Clients(object):
                 auth_token = kc.auth_token
                 client = glance.Client(version,
                                        endpoint=glance_api_url,
+                                       project_name=CONF.project_name,
                                        token=auth_token,
                                        cacert=CONF.https_cacert)
                 return client, kc
