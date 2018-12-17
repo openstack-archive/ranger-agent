@@ -14,8 +14,8 @@
 
 from glanceclient import client as glance
 from heatclient import client as heat
-from keystoneclient.auth.identity import v3
-from keystoneclient import session as ksc_session
+from keystoneauth1.identity import v3
+from keystoneauth1 import session as ksc_session
 from keystoneclient.v3 import client as keystone_v3
 from oslo_config import cfg
 
@@ -121,15 +121,19 @@ class Clients(object):
         """
         attempt = 1
         while attempt >= 0:
-            try:
-                heat_api_url = kc.session.get_endpoint(
-                    service_type='orchestration')
-                auth_token = kc.auth_token
-                client = heat.Client(version,
-                                     endpoint=heat_api_url,
-                                     project_name=CONF.project_name,
-                                     cacert=CONF.https_cacert,
-                                     token=auth_token)
+            try:                
+                kwargs = {
+                    'auth_url': CONF.auth_url,
+                    'session': kc.session,
+                    'auth': kc.session.auth,
+                    'service_type': 'orchestration',
+                    'endpoint_type': 'publicURL',
+                    'username': CONF.username,
+                    'password': CONF.password,
+                    'include_pass': 'False',
+                    'endpoint_override': '',
+                }                
+                client = heat.Client(version, **kwargs)
                 return client, kc
             except Exception as ex:
                 try:
@@ -153,14 +157,18 @@ class Clients(object):
         attempt = 1
         while attempt >= 0:
             try:
-                glance_api_url = kc.session.get_endpoint(
-                    service_type='image')
-                auth_token = kc.auth_token
-                client = glance.Client(version,
-                                       endpoint=glance_api_url,
-                                       project_name=CONF.project_name,
-                                       token=auth_token,
-                                       cacert=CONF.https_cacert)
+                kwargs = {
+                    'auth_url': CONF.auth_url,
+                    'session': kc.session,
+                    'auth': kc.session.auth,
+                    'service_type': 'image',
+                    'endpoint_type': 'publicURL',
+                    'username': CONF.username,
+                    'password': CONF.password,
+                    'include_pass': 'False',
+                    'endpoint_override': '',
+                }                
+                client = glance.Client(version, **kwargs)                
                 return client, kc
             except Exception as ex:
                 try:
