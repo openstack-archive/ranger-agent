@@ -123,11 +123,11 @@ class Clients(object):
         while attempt >= 0:
             try:
                 heat_api_url = kc.session.get_endpoint(
-                    service_type='orchestration')
+                    service_type='orchestration',
+                    interface = 'public')
                 auth_token = kc.auth_token
                 client = heat.Client(version,
                                      endpoint=heat_api_url,
-                                     project_name=CONF.project_name,
                                      cacert=CONF.https_cacert,
                                      token=auth_token)
                 return client, kc
@@ -154,11 +154,11 @@ class Clients(object):
         while attempt >= 0:
             try:
                 glance_api_url = kc.session.get_endpoint(
-                    service_type='image')
+                    service_type='image',
+                    interface = 'public')
                 auth_token = kc.auth_token
                 client = glance.Client(version,
                                        endpoint=glance_api_url,
-                                       project_name=CONF.project_name,
                                        token=auth_token,
                                        cacert=CONF.https_cacert)
                 return client, kc
