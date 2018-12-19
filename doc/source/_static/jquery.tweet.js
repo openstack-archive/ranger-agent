@@ -6,7 +6,7 @@
       list: null,                              //[string]   optional name of list belonging to username
       avatar_size: null,                      // [integer]  height and width of avatar if displayed (48px max)
       count: 3,                               // [integer]  how many tweets to display?
-      intro_text: null,                       // [string]   do you want text BEFORE your your tweets?
+      intro_text: null,                       // [string]   do you want text BEFORE your tweets?
       outro_text: null,                       // [string]   do you want text AFTER your tweets?
       join_text:  null,                       // [string]   optional text in between date and tweet, try setting to "auto"
       auto_join_text_default: "i said,",      // [string]   auto text for non verb: "i said" bullocks
