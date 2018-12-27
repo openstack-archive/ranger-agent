@@ -1,7 +1,7 @@
 [DEFAULT]
 api_paste_config = /etc/ranger-agent/api-paste.ini
 api_workers = 1
-debug = false
+debug_level = 'DEBUG'
 enable_rds_callback_check = false
 local_repo = ranger_repo
 log_dir = /var/log/ranger-agent
@@ -13,7 +13,6 @@ resource_creation_timeout_max = 14400
 resource_creation_timeout_min = 1200
 resource_status_check_wait = 15
 transport_url = rabbit://ranger-agent:password@rabbitmq.openstack.svc.cluster.local:5672/ranger-agent
-verbose = true
 
 [api]
 host = 0.0.0.0

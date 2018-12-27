@@ -51,21 +51,11 @@ from ord.openstack.common import local
 
 _DEFAULT_LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-
-common_cli_opts = [
-    cfg.BoolOpt('debug',
-                short='d',
-                default=False,
-                help='Print debugging output (set logging level to '
-                     'DEBUG instead of default WARNING level).'),
-    cfg.BoolOpt('verbose',
-                short='v',
-                default=False,
-                help='Print more verbose output (set logging level to '
-                     'INFO instead of default WARNING level).'),
-]
-
 logging_cli_opts = [
+    cfg.StrOpt('debug_level',
+               default='ERROR',
+               choices=('CRITICAL', 'DEBUG', 'ERROR', 'INFO', 'WARN'),
+               help='logging debug level'),
     cfg.StrOpt('log-config-append',
                metavar='PATH',
                deprecated_name='log-config',
@@ -169,7 +159,6 @@ log_opts = [
 ]
 
 CONF = cfg.CONF
-CONF.register_cli_opts(common_cli_opts)
 CONF.register_cli_opts(logging_cli_opts)
 CONF.register_opts(generic_log_opts)
 CONF.register_opts(log_opts)
@@ -177,8 +166,7 @@ CONF.register_opts(log_opts)
 
 def list_opts():
     """Entry point for oslo.config-generator."""
-    return [(None, copy.deepcopy(common_cli_opts)),
-            (None, copy.deepcopy(logging_cli_opts)),
+    return [(None, copy.deepcopy(logging_cli_opts)),
             (None, copy.deepcopy(generic_log_opts)),
             (None, copy.deepcopy(log_opts)),
             ]
@@ -529,12 +517,16 @@ def _setup_logging_from_conf(project, version):
                                                   version=version,
                                                   datefmt=datefmt))
 
-    if CONF.debug:
+    if CONF.debug_level == 'CRITICAL':
+        log_root.setLevel(logging.CRITICAL)
+    elif CONF.debug_level == 'DEBUG':
         log_root.setLevel(logging.DEBUG)
-    elif CONF.verbose:
+    elif CONF.debug_level == 'INFO':
         log_root.setLevel(logging.INFO)
-    else:
+    elif CONF.debug_level == 'WARN':
         log_root.setLevel(logging.WARNING)
+    else:
+        log_root.setLevel(logging.ERROR)
 
     for pair in CONF.default_log_levels:
         mod, _sep, level_name = pair.partition('=')
