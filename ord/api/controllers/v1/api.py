@@ -69,7 +69,7 @@ class ListenerQueueHandler(object):
             LOG.debug(" Payload to RDS Listener %s " % listener_response_body)
             headers = {'Content-type': 'application/json'}
             rds_url = CONF.orm.rds_listener_endpoint
-            req = urllib2.Request(rds_url,
+            req = urllib2.Request(rds_url, # nosec
                                   json.dumps(listener_response_body),
                                   headers,
                                   unverifiable=False)
@@ -87,7 +87,7 @@ class ListenerQueueHandler(object):
             status_code = None
             try:
                 LOG.info('Connecting to RDS at %s' % rds_url)
-                resp = urllib2.urlopen(req)
+                resp = urllib2.urlopen(req)  # nosec
                 status = utils.STATUS_RDS_SUCCESS
                 if resp is not None:
                     status_code = resp.getcode()
