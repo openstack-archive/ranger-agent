@@ -16,7 +16,7 @@
 # Server Specific Configurations
 server = {
     'port': '9010',
-    'host': '0.0.0.0'
+    'host': '0.0.0.0'  # nosec
 }
 
 # Pecan Application Configurations

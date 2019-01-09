@@ -22,7 +22,7 @@ OPTS = [
                help='The port for the ORD API server.',
                ),
     cfg.StrOpt('host',
-               default='0.0.0.0',
+               default='0.0.0.0',  # nosec
                help='The listen IP for the ORD API server.',
                ),
 ]

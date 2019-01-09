@@ -75,7 +75,7 @@ class TemplateRepoClient(object):
                     repopath, repo)
                 self.run_git('GitRepoInit', cmd, workdir=repopath)
             except Exception as repoexp:
-                pass
+                LOG.warning(repoexp)
             # fetch origin
             rem_lock_file = '{0}/.git/refs/remotes/origin/master.lock'\
                 .format(repopath)
@@ -182,8 +182,8 @@ class TemplateRepoClient(object):
                             [stdout, stderr] = fetch_process.communicate()
                             LOG.info("Run command '%s' to syncup"
                                      " repo after error", fetch)
-                        except Exception:
-                            pass
+                        except Exception as exp:
+                            LOG.warning(exp)
 
         if process.returncode != 0:
             self.check_git_errors(label, proc_result)
