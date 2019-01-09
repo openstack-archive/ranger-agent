@@ -134,7 +134,7 @@ def build_server():
     LOG.info(_("Configuration:"))
     cfg.CONF.log_opt_values(LOG, logging.INFO)
 
-    if host == '0.0.0.0':
+    if host == '0.0.0.0':  # nosec
         LOG.info(_(
             'serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s')
             % ({'sport': port, 'vport': port}))

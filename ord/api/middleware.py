@@ -20,7 +20,7 @@ Based on pecan.middleware.errordocument
 
 import json
 
-from lxml import etree
+from lxml import etree  # nosec
 import webob
 
 from ord import i18n
