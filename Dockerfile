@@ -41,19 +41,19 @@ RUN pip install --default-timeout=100 -r requirements.txt
 
 RUN python setup.py install
 
-ARG user
+ARG user=ranger_agent
 
 # Create user for ranger-agent
-RUN useradd -u 1000 -ms /bin/false ${user:-ranger_agent}
+RUN useradd -u 1000 -ms /bin/false ${user}
 
 # Change permissions
-RUN chown -R ${user:-ranger_agent}: /home/${user:-ranger_agent} \
-    && chown -R ${user:-ranger_agent}: /etc/ranger-agent \
+RUN chown -R ${user}: /home/${user} \
+    && chown -R ${user}: /etc/ranger-agent \
     && mkdir /var/log/ranger-agent \
-    && chown -R ${user:-ranger_agent}: /var/log/ranger-agent \
+    && chown -R ${user}: /var/log/ranger-agent \
     && cd ~/ \
     && rm -fr /tmp/ranger-agent
 
 # Set work directory
-USER ${user:-ranger_agent}
-WORKDIR /home/${user:-ranger_agent}/
+USER ${user}
+WORKDIR /home/${user}/
