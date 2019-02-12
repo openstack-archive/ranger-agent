@@ -51,6 +51,7 @@ RUN chown -R ${user}: /home/${user} \
     && chown -R ${user}: /etc/ranger-agent \
     && mkdir /var/log/ranger-agent \
     && chown -R ${user}: /var/log/ranger-agent \
+    && chown -R ${user}: /etc/ranger-agent \
     && cd ~/ \
     && rm -fr /tmp/ranger-agent
 
