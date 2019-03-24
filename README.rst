@@ -13,7 +13,7 @@ configuration files, and documentation.
 Devstack Installation
 ---------------------
 1. You can include ranger-agent repository in `local.conf` when running devstack.
-	`enable_plugin ranger-agent git://git.openstack.org/openstack/ranger-agent`
+	`enable_plugin ranger-agent https://git.openstack.org/openstack/ranger-agent`
 
 2. Make sure `MYSQL_PASSWORD` is included for creating and accessing the database.
 
