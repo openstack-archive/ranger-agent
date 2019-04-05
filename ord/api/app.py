@@ -17,6 +17,7 @@ import logging
 from ord.api import config as api_config
 from ord.api.controllers.v1 import api
 from ord.api import middleware
+from ord.common.security_headers_hook import SecurityHeadersHook
 from ord.i18n import _
 from ord.i18n import _LW
 from ord.openstack.common import log
@@ -58,7 +59,7 @@ def get_pecan_config():
 
 
 def setup_app(pecan_config=None, extra_hooks=None):
-    app_hooks = []
+    app_hooks = [SecurityHeadersHook()]
     if extra_hooks:
         app_hooks.extend(extra_hooks)
 
