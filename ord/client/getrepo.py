@@ -109,6 +109,9 @@ class TemplateRepoClient(object):
         if os.path.isfile(templatepath):
             os.remove(templatepath)
 
+        cmd = 'git -C {0} fetch origin'.format(workdir)
+        self.run_git('PullTemplate', cmd, workdir=workdir)
+
         cmd = 'git -C {0} checkout FETCH_HEAD  -- {1}'.format(
             workdir, pathtotemplate)
         self.run_git('PullTemplate', cmd, workdir=workdir, is_timeout=True)
